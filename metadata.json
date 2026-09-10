@@ -1,0 +1,6 @@
+{
+  "name": "Capital Tycoon",
+  "description": "Prototipo interactivo de juego de mesa de bienes raíces y gestión de propiedades.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

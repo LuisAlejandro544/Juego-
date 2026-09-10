@@ -1,0 +1,2 @@
+# Requisitos de Python para el generador de tableros
+Pillow>=10.0.0

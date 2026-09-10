@@ -1,0 +1,50 @@
+name: Generar Tableros de España
+
+# =============================================================================
+# ACTIVACIÓN ESTRICTAMENTE MANUAL (workflow_dispatch)
+# =============================================================================
+# Este workflow NO se ejecuta automáticamente con push ni pull_request.
+# Solo se ejecuta cuando el usuario presiona el botón "Run workflow" en GitHub Actions.
+on:
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: 'Motivo o nota de la generación (opcional)'
+        required: false
+        default: 'Generación manual de tableros de España'
+
+permissions:
+  contents: read
+
+jobs:
+  generar-tableros:
+    name: Generar Tablero Color y Blanco/Negro
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar entorno Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 3. Instalar librerías necesarias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      - name: 4. Ejecutar generador de las 40 casillas
+        run: |
+          python scripts/generar_tablero.py
+
+      - name: 5. Publicar ambos PNG como artefacto para descarga directa
+        uses: actions/upload-artifact@v4
+        with:
+          name: tableros-espana-png
+          path: |
+            output/tablero_espana_color.png
+            output/tablero_espana_byn.png
+          retention-days: 30
