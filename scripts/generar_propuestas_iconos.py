@@ -487,82 +487,194 @@ def generar_comunidad_v1_cofre(tamano=256):
 
 def generar_comunidad_v2_cofre_oro(tamano=256):
     """
-    Variante 2 (NUEVA): Cofre del tesoro entreabierto rebosante de monedas de oro brillantes.
-    Diseñado específicamente para tener un contraste ultra alto y silueta abierta
-    que nunca se empaste al reducirse de tamaño.
+    Variante 2 (NUEVA MEJORADA): Cofre del tesoro entreabierto rebosante de lingotes y monedas de oro.
+    Completamente rediseñado para eliminar cualquier masa plana amarilla: cada moneda y lingote
+    posee volumen individual, caras biseladas y reflejos especulares nítidos.
     """
     img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
     cx, cy = T // 2, T // 2 + (15 * S)
 
     color_madera = (139, 69, 19)      # Caoba cálida
-    color_madera_oscura = (92, 45, 12)
-    color_oro_monedas = (255, 215, 0)  # Oro brillante
+    color_madera_oscura = (74, 35, 10)
+    color_fondo_interior = (45, 20, 10) # Fondo oscuro en penumbra (sin masa amarilla)
+    color_terciopelo = (183, 28, 28)
+    color_oro_lingote_top = (255, 238, 88)
+    color_oro_lingote_front = (253, 216, 53)
+    color_oro_lingote_side = (245, 127, 23)
+    color_oro_moneda = (255, 215, 0)
     color_oro_sombra = (218, 165, 32)
-    color_oro_brillo = (255, 249, 196)
     color_hierro = (55, 71, 79)
     color_borde = (25, 20, 15)
     w_borde = 5 * S
 
-    # 1. Resplandor dorado de fondo detrás de la tapa
-    draw.ellipse([cx - (75 * S), cy - (90 * S), cx + (75 * S), cy + (10 * S)], fill=(255, 236, 179, 180))
+    # 1. Resplandor dorado tenue detrás de la tapa abierta
+    draw.ellipse([cx - (75 * S), cy - (85 * S), cx + (75 * S), cy + (10 * S)], fill=(255, 243, 224, 120))
 
-    # 2. Tapa abierta inclinada hacia atrás
+    # 2. Tapa abierta inclinada hacia atrás con tablas de caoba
     pts_tapa = [
-        (cx - (70 * S), cy - (40 * S)),
-        (cx + (70 * S), cy - (40 * S)),
-        (cx + (60 * S), cy - (85 * S)),
-        (cx - (60 * S), cy - (85 * S))
+        (cx - (72 * S), cy - (38 * S)),
+        (cx + (72 * S), cy - (38 * S)),
+        (cx + (62 * S), cy - (85 * S)),
+        (cx - (62 * S), cy - (85 * S))
     ]
     draw.polygon(pts_tapa, fill=color_madera, outline=color_borde)
     draw.line(pts_tapa + [pts_tapa[0]], fill=color_borde, width=w_borde)
 
-    # Forro interior de terciopelo carmesí visible en la tapa
+    # Forro interior de terciopelo carmesí noble visible en la tapa
     pts_forro = [
-        (cx - (55 * S), cy - (46 * S)),
-        (cx + (55 * S), cy - (46 * S)),
-        (cx + (48 * S), cy - (78 * S)),
-        (cx - (48 * S), cy - (78 * S))
+        (cx - (58 * S), cy - (44 * S)),
+        (cx + (58 * S), cy - (44 * S)),
+        (cx + (50 * S), cy - (78 * S)),
+        (cx - (50 * S), cy - (78 * S))
     ]
-    draw.polygon(pts_forro, fill=(183, 28, 28), outline=color_borde, width=2 * S)
+    draw.polygon(pts_forro, fill=color_terciopelo, outline=color_borde, width=2 * S)
 
-    # 3. Montaña de monedas de oro en el interior del cofre (resaltan intensamente)
-    draw.ellipse([cx - (60 * S), cy - (45 * S), cx + (60 * S), cy + (5 * S)], fill=color_oro_monedas, outline=color_borde, width=w_borde)
-    
-    # Textura de monedas superpuestas con brillos individuales
-    posiciones_monedas = [
-        (cx - 35 * S, cy - 25 * S), (cx - 15 * S, cy - 32 * S), (cx + 10 * S, cy - 30 * S), (cx + 35 * S, cy - 22 * S),
-        (cx - 25 * S, cy - 12 * S), (cx, cy - 18 * S), (cx + 25 * S, cy - 10 * S),
-        (cx - 40 * S, cy - 5 * S), (cx + 40 * S, cy - 2 * S)
+    # Bandas doradas de refuerzo en la tapa abierta
+    for bx in [cx - (38 * S), cx + (38 * S)]:
+        draw.line([bx, cy - (84 * S), bx, cy - (40 * S)], fill=(255, 215, 0), width=4 * S)
+
+    # 3. Cavidad interior del cofre en sombra (fondo oscuro realista)
+    draw.polygon([
+        (cx - (64 * S), cy - (38 * S)),
+        (cx + (64 * S), cy - (38 * S)),
+        (cx + (64 * S), cy + (5 * S)),
+        (cx - (64 * S), cy + (5 * S))
+    ], fill=color_fondo_interior)
+
+    # 4. Lingotes de oro tridimensionales individuales en el interior
+    def dibujar_lingote(lx, ly, lw, lh):
+        # Cara superior inclinada
+        pts_top = [(lx, ly), (lx + lw, ly), (lx + lw - (6 * S), ly - (10 * S)), (lx + (6 * S), ly - (10 * S))]
+        draw.polygon(pts_top, fill=color_oro_lingote_top, outline=color_borde, width=2 * S)
+        # Cara frontal
+        pts_front = [(lx, ly), (lx + lw, ly), (lx + lw, ly + lh), (lx, ly + lh)]
+        draw.polygon(pts_front, fill=color_oro_lingote_front, outline=color_borde, width=2 * S)
+        # Cara lateral derecha
+        pts_side = [(lx + lw, ly), (lx + lw + (6 * S), ly - (6 * S)), (lx + lw + (6 * S), ly + lh - (6 * S)), (lx + lw, ly + lh)]
+        draw.polygon(pts_side, fill=color_oro_lingote_side, outline=color_borde, width=2 * S)
+        # Reflejo blanco en el vértice superior
+        draw.line([(lx + (8 * S), ly - (8 * S)), (lx + lw - (4 * S), ly - (8 * S))], fill=(255, 255, 255), width=2 * S)
+
+    # Lingotes apilados en el fondo
+    dibujar_lingote(cx - (42 * S), cy - (20 * S), 38 * S, 14 * S)
+    dibujar_lingote(cx + (4 * S), cy - (18 * S), 38 * S, 14 * S)
+    dibujar_lingote(cx - (18 * S), cy - (30 * S), 36 * S, 13 * S)
+
+    # 5. Cascada de monedas de oro individuales con cantos definidos y brillos
+    # Sin ninguna masa amarilla: cada moneda se genera con relieve y coordenadas precisas
+    monedas = [
+        # Capa profunda
+        (cx - 38 * S, cy - 8 * S, 11 * S, 6 * S),
+        (cx - 15 * S, cy - 10 * S, 12 * S, 7 * S),
+        (cx + 12 * S, cy - 9 * S, 11 * S, 6 * S),
+        (cx + 36 * S, cy - 7 * S, 12 * S, 7 * S),
+        # Capa media desbordante
+        (cx - 48 * S, cy - 2 * S, 12 * S, 7 * S),
+        (cx - 28 * S, cy - 3 * S, 13 * S, 8 * S),
+        (cx - 6 * S, cy - 4 * S, 13 * S, 8 * S),
+        (cx + 18 * S, cy - 2 * S, 13 * S, 8 * S),
+        (cx + 42 * S, cy - 1 * S, 12 * S, 7 * S),
+        # Capa frontal en el borde del cofre
+        (cx - 36 * S, cy + 4 * S, 14 * S, 8 * S),
+        (cx - 16 * S, cy + 3 * S, 14 * S, 8 * S),
+        (cx + 6 * S, cy + 4 * S, 14 * S, 8 * S),
+        (cx + 28 * S, cy + 5 * S, 14 * S, 8 * S),
+        (cx - 52 * S, cy + 5 * S, 11 * S, 6 * S),
+        (cx + 48 * S, cy + 6 * S, 11 * S, 6 * S),
     ]
-    for mx, my in posiciones_monedas:
-        draw.ellipse([mx - (10 * S), my - (6 * S), mx + (10 * S), my + (6 * S)], fill=color_oro_sombra, outline=color_borde, width=2 * S)
-        draw.ellipse([mx - (8 * S), my - (5 * S), mx + (8 * S), my + (4 * S)], fill=color_oro_monedas)
-        draw.ellipse([mx - (4 * S), my - (4 * S), mx + (2 * S), my], fill=color_oro_brillo)
+    for mx, my, mw, mh in monedas:
+        # Borde y base de sombra
+        draw.ellipse([mx - mw, my - mh, mx + mw, my + mh], fill=color_oro_sombra, outline=color_borde, width=2 * S)
+        # Relleno de oro puro
+        draw.ellipse([mx - mw + (1 * S), my - mh + (1 * S), mx + mw - (1 * S), my + mh - (1 * S)], fill=color_oro_moneda)
+        # Borde biselado interior
+        draw.ellipse([mx - mw + (3 * S), my - mh + (2 * S), mx + mw - (3 * S), my + mh - (2 * S)], outline=color_oro_sombra, width=1 * S)
+        # Brillo especular blanco en arco superior
+        draw.arc([mx - mw + (2 * S), my - mh + (1 * S), mx + mw - (2 * S), my + mh - (1 * S)], start=200, end=340, fill=(255, 255, 255), width=2 * S)
 
-    # Destello estelar de brillo (4 puntas) saliendo del tesoro
-    dx, dy = cx - (20 * S), cy - (40 * S)
-    draw.polygon([(dx, dy - 18 * S), (dx + 4 * S, dy - 4 * S), (dx + 18 * S, dy), (dx + 4 * S, dy + 4 * S),
-                  (dx, dy + 18 * S), (dx - 4 * S, dy + 4 * S), (dx - 18 * S, dy), (dx - 4 * S, dy - 4 * S)], fill=(255, 255, 255))
+    # Gemas preciosas incrustadas entre el oro (Rubí y Zafiro)
+    # Rubí rojo facetado
+    rx, ry = cx - (24 * S), cy - (5 * S)
+    draw.polygon([(rx, ry - 6 * S), (rx + 6 * S, ry), (rx, ry + 6 * S), (rx - 6 * S, ry)], fill=(229, 57, 53), outline=color_borde, width=2 * S)
+    draw.polygon([(rx - 2 * S, ry - 2 * S), (rx + 2 * S, ry - 2 * S), (rx, ry + 2 * S)], fill=(255, 138, 128))
+    # Zafiro azul facetado
+    zx, zy = cx + (22 * S), cy - (4 * S)
+    draw.polygon([(zx, zy - 6 * S), (zx + 6 * S, zy), (zx, zy + 6 * S), (zx - 6 * S, zy)], fill=(30, 136, 229), outline=color_borde, width=2 * S)
+    draw.polygon([(zx - 2 * S, zy - 2 * S), (zx + 2 * S, zy - 2 * S), (zx, zy + 2 * S)], fill=(144, 202, 249))
 
-    # 4. Cuerpo frontal del cofre de caoba
-    draw.rectangle([cx - (68 * S), cy - (8 * S), cx + (68 * S), cy + (52 * S)], fill=color_madera, outline=color_borde, width=w_borde)
+    # Dos destellos estelares (4 puntas) nítidos
+    def destello_estelar(dx, dy, r):
+        pts_d = [(dx, dy - r), (dx + r // 4, dy - r // 4), (dx + r, dy), (dx + r // 4, dy + r // 4),
+                 (dx, dy + r), (dx - r // 4, dy + r // 4), (dx - r, dy), (dx - r // 4, dy - r // 4)]
+        draw.polygon(pts_d, fill=(255, 255, 255))
 
-    # Tablones de madera con hendidura
-    draw.line([cx - (68 * S), cy + (22 * S), cx + (68 * S), cy + (22 * S)], fill=color_madera_oscura, width=3 * S)
+    destello_estelar(cx - (28 * S), cy - (32 * S), 16 * S)
+    destello_estelar(cx + (26 * S), cy - (26 * S), 12 * S)
 
-    # Herrajes y esquinas reforzadas de hierro con remaches
-    draw.rectangle([cx - (68 * S), cy - (8 * S), cx - (48 * S), cy + (52 * S)], fill=color_hierro, outline=color_borde, width=3 * S)
-    draw.rectangle([cx + (48 * S), cy - (8 * S), cx + (68 * S), cy + (52 * S)], fill=color_hierro, outline=color_borde, width=3 * S)
+    # 6. Cuerpo frontal del cofre de caoba con molduras y tablones
+    draw.rectangle([cx - (68 * S), cy + (8 * S), cx + (68 * S), cy + (58 * S)], fill=color_madera, outline=color_borde, width=w_borde)
+
+    # Tablones ranurados horizontales
+    draw.line([cx - (68 * S), cy + (25 * S), cx + (68 * S), cy + (25 * S)], fill=color_madera_oscura, width=3 * S)
+    draw.line([cx - (68 * S), cy + (42 * S), cx + (68 * S), cy + (42 * S)], fill=color_madera_oscura, width=3 * S)
+
+    # Herrajes esquineros dorados de latón remachados
+    draw.rectangle([cx - (68 * S), cy + (8 * S), cx - (46 * S), cy + (58 * S)], fill=color_oro_sombra, outline=color_borde, width=3 * S)
+    draw.rectangle([cx + (46 * S), cy + (8 * S), cx + (68 * S), cy + (58 * S)], fill=color_oro_sombra, outline=color_borde, width=3 * S)
 
     # Remaches circulares en los herrajes
-    for ry in [cy + (2 * S), cy + (40 * S)]:
-        draw.ellipse([cx - (60 * S), ry - (3 * S), cx - (54 * S), ry + (3 * S)], fill=color_oro_monedas)
-        draw.ellipse([cx + (54 * S), ry - (3 * S), cx + (60 * S), ry + (3 * S)], fill=color_oro_monedas)
+    for ry in [cy + (18 * S), cy + (35 * S), cy + (50 * S)]:
+        draw.ellipse([cx - (59 * S), ry - (3 * S), cx - (53 * S), ry + (3 * S)], fill=color_oro_lingote_top, outline=color_borde, width=1 * S)
+        draw.ellipse([cx + (53 * S), ry - (3 * S), cx + (59 * S), ry + (3 * S)], fill=color_oro_lingote_top, outline=color_borde, width=1 * S)
 
-    # Gran cerradura dorada en el centro
-    draw.rounded_rectangle([cx - (16 * S), cy - (4 * S), cx + (16 * S), cy + (26 * S)], radius=4 * S, fill=color_oro_monedas, outline=color_borde, width=3 * S)
-    draw.ellipse([cx - (5 * S), cy + (4 * S), cx + (5 * S), cy + (12 * S)], fill=color_borde)
-    draw.polygon([(cx - 3 * S, cy + 10 * S), (cx + 3 * S, cy + 10 * S), (cx, cy + 20 * S)], fill=color_borde)
+    # Gran cerradura ornamental en forma de escudo con ojo de cerradura
+    cx_pl = cx
+    cy_pl = cy + (22 * S)
+    draw.polygon([
+        (cx_pl - (18 * S), cy_pl - (10 * S)),
+        (cx_pl + (18 * S), cy_pl - (10 * S)),
+        (cx_pl + (18 * S), cy_pl + (10 * S)),
+        (cx_pl, cy_pl + (22 * S)),
+        (cx_pl - (18 * S), cy_pl + (10 * S))
+    ], fill=color_oro_lingote_front, outline=color_borde, width=3 * S)
+
+    # Ojo de la cerradura (silueta de bocallave tradicional)
+    draw.ellipse([cx_pl - (4 * S), cy_pl - (4 * S), cx_pl + (4 * S), cy_pl + (4 * S)], fill=color_borde)
+    draw.polygon([(cx_pl - (3 * S), cy_pl), (cx_pl + (3 * S), cy_pl), (cx_pl + (4 * S), cy_pl + (10 * S)), (cx_pl - (4 * S), cy_pl + (10 * S))], fill=color_borde)
+
+    return finalizar_hi_res(img_hi, tamano)
+
+
+def generar_comunidad_v4_tesoro_reliquia(tamano=256):
+    """Variante 4: Cofre acorazado medieval con doble cerrojo y gemas engastadas."""
+    img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
+    cx, cy = T // 2, T // 2 + (5 * S)
+
+    color_roble = (93, 64, 55)
+    color_roble_oscuro = (62, 39, 35)
+    color_acero = (144, 164, 174)
+    color_acero_oscuro = (69, 90, 100)
+    color_oro = (255, 215, 0)
+    color_borde = (33, 33, 33)
+    w_borde = 5 * S
+
+    # Cuerpo macizo del cofre
+    draw.rounded_rectangle([cx - (65 * S), cy - (40 * S), cx + (65 * S), cy + (50 * S)], radius=10 * S, fill=color_roble, outline=color_borde, width=w_borde)
+
+    # Tapa semicilíndrica abovedada
+    draw.chord([cx - (65 * S), cy - (75 * S), cx + (65 * S), cy - (5 * S)], start=180, end=0, fill=color_roble_oscuro, outline=color_borde, width=w_borde)
+
+    # Bandas de acero forjado horizontales y verticales
+    draw.line([cx - (65 * S), cy - (15 * S), cx + (65 * S), cy - (15 * S)], fill=color_acero, width=6 * S)
+    draw.line([cx - (65 * S), cy + (25 * S), cx + (65 * S), cy + (25 * S)], fill=color_acero, width=6 * S)
+    draw.line([cx - (35 * S), cy - (60 * S), cx - (35 * S), cy + (50 * S)], fill=color_acero, width=6 * S)
+    draw.line([cx + (35 * S), cy - (60 * S), cx + (35 * S), cy + (50 * S)], fill=color_acero, width=6 * S)
+
+    # Gran candado central de latón dorado
+    draw.arc([cx - (15 * S), cy - (20 * S), cx + (15 * S), cy + (10 * S)], start=180, end=0, fill=color_acero, width=5 * S)
+    draw.rounded_rectangle([cx - (18 * S), cy - (5 * S), cx + (18 * S), cy + (25 * S)], radius=4 * S, fill=color_oro, outline=color_borde, width=3 * S)
+    draw.ellipse([cx - (3 * S), cy + (3 * S), cx + (3 * S), cy + (9 * S)], fill=color_borde)
+    draw.polygon([(cx - (2 * S), cy + (7 * S)), (cx + (2 * S), cy + (7 * S)), (cx, cy + (17 * S))], fill=color_borde)
 
     return finalizar_hi_res(img_hi, tamano)
 
@@ -627,68 +739,101 @@ def generar_suerte_v1_interrogante(tamano=256):
 
 
 # =============================================================================
-# GENERADORES DE VARIANTES: 8. ESQUINAS DEL TABLERO (PARKING, POLICÍA, SALIDA)
+# GENERADORES DE VARIANTES: 8. ESQUINAS DEL TABLERO (PARKING, POLICÍA, CÁRCEL, SALIDA)
 # =============================================================================
 
 def generar_parking_v1_coche_vintage(tamano=256):
-    """Variante 1: Coche clásico descapotable de colección en rojo vivo con detalles cromados."""
+    """
+    Variante 1 (REDISEÑADA Y AMPLIADA): Coupé clásico vintage de los años 30 en rojo cereza
+    con presencia monumental, parrilla cromada vertical, faros dobles y neumáticos de banda blanca.
+    """
     img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
-    cx, cy = T // 2, T // 2 + (5 * S)
+    cx, cy = T // 2, T // 2 + (8 * S)
 
-    color_coche = (211, 47, 47)        # Rojo deportivo clásico
-    color_coche_sombra = (183, 28, 28)
-    color_cromo = (236, 239, 241)       # Cromo pulido
-    color_faros = (255, 238, 88)       # Amarillo luz
-    color_ruedas = (33, 33, 33)        # Neumáticos negros
+    color_carroceria = (198, 40, 40)        # Rojo cereza profundo
+    color_carroceria_sombra = (142, 28, 28)
+    color_carroceria_luz = (239, 83, 80)
+    color_cromo = (236, 239, 241)           # Cromado brillante
+    color_cromo_sombra = (176, 190, 197)
+    color_faros = (255, 238, 88)           # Cristal amarillo facetado
+    color_neumaticos = (33, 33, 33)        # Goma negra
     color_borde = (25, 25, 25)
     w_borde = 5 * S
 
-    # Sombra del coche sobre el suelo
-    draw.ellipse([cx - (80 * S), cy + (45 * S), cx + (80 * S), cy + (65 * S)], fill=(0, 0, 0, 80))
+    # 1. Sombra de contacto alargada sobre el asfalto
+    draw.ellipse([cx - (95 * S), cy + (44 * S), cx + (95 * S), cy + (68 * S)], fill=(0, 0, 0, 95))
 
-    # Carrocería principal (silueta redondeada vintage)
-    pts_cuerpo = [
-        (cx - (75 * S), cy + (35 * S)),
-        (cx - (80 * S), cy + (15 * S)),
-        (cx - (70 * S), cy),
-        (cx - (55 * S), cy - (10 * S)),
-        (cx - (30 * S), cy - (28 * S)),   # Parabrisas
-        (cx + (15 * S), cy - (28 * S)),
-        (cx + (35 * S), cy - (10 * S)),
-        (cx + (75 * S), cy + (10 * S)),
-        (cx + (78 * S), cy + (35 * S)),
+    # 2. Guardabarros traseros y delanteros curvados (volumen clásico)
+    # Guardabarros trasero
+    draw.chord([cx - (92 * S), cy + (10 * S), cx - (35 * S), cy + (60 * S)], start=180, end=0, fill=color_carroceria_sombra, outline=color_borde, width=w_borde)
+    # Guardabarros delantero prominente
+    draw.chord([cx + (22 * S), cy + (10 * S), cx + (86 * S), cy + (60 * S)], start=180, end=0, fill=color_carroceria_sombra, outline=color_borde, width=w_borde)
+
+    # 3. Carrocería principal (cabina cupé redondeada y capó alargado)
+    pts_carroceria = [
+        (cx - (82 * S), cy + (36 * S)),
+        (cx - (86 * S), cy + (14 * S)),
+        (cx - (74 * S), cy - (4 * S)),
+        (cx - (58 * S), cy - (16 * S)),
+        (cx - (32 * S), cy - (36 * S)),   # Inicio techo
+        (cx + (14 * S), cy - (36 * S)),   # Fin techo
+        (cx + (34 * S), cy - (14 * S)),   # Parabrisas inclinado hacia capó
+        (cx + (78 * S), cy + (4 * S)),    # Extremo del capó
+        (cx + (84 * S), cy + (24 * S)),
+        (cx + (84 * S), cy + (40 * S)),
     ]
-    draw.polygon(pts_cuerpo, fill=color_coche, outline=color_borde)
-    draw.line(pts_cuerpo + [pts_cuerpo[0]], fill=color_borde, width=w_borde)
+    draw.polygon(pts_carroceria, fill=color_carroceria, outline=color_borde)
+    draw.line(pts_carroceria + [pts_carroceria[0]], fill=color_borde, width=w_borde)
 
-    # Parabrisas de cristal tintado con marco cromado
+    # Línea de brillo curvada en el capó y techo
+    draw.arc([cx - (65 * S), cy - (32 * S), cx + (25 * S), cy + (8 * S)], start=190, end=340, fill=color_carroceria_luz, width=4 * S)
+
+    # 4. Parabrisas de cristal biselado con marco cromado
     pts_vidrio = [
-        (cx - (26 * S), cy - (24 * S)),
-        (cx + (12 * S), cy - (24 * S)),
-        (cx + (28 * S), cy - (8 * S)),
-        (cx - (42 * S), cy - (8 * S))
+        (cx - (26 * S), cy - (30 * S)),
+        (cx + (10 * S), cy - (30 * S)),
+        (cx + (26 * S), cy - (14 * S)),
+        (cx - (36 * S), cy - (14 * S))
     ]
     draw.polygon(pts_vidrio, fill=(179, 229, 252), outline=color_borde, width=3 * S)
+    # Reflejo diagonal de luz en el vidrio
+    draw.line([(cx - (15 * S), cy - (28 * S)), (cx - (28 * S), cy - (16 * S))], fill=(255, 255, 255), width=3 * S)
+    draw.line([(cx + (2 * S), cy - (28 * S)), (cx - (8 * S), cy - (16 * S))], fill=(255, 255, 255), width=2 * S)
 
-    # Volante visible
-    draw.arc([cx - (15 * S), cy - (15 * S), cx + (5 * S), cy + (5 * S)], start=180, end=360, fill=(33, 33, 33), width=4 * S)
+    # 5. Parrilla de radiador frontal cromada de lujo (estilo Rolls / Duesenberg)
+    draw.rounded_rectangle([cx + (76 * S), cy + (6 * S), cx + (88 * S), cy + (44 * S)], radius=4 * S, fill=color_cromo, outline=color_borde, width=3 * S)
+    # Rejillas verticales finas del radiador
+    for gx in [cx + (80 * S), cx + (84 * S)]:
+        draw.line([gx, cy + (10 * S), gx, cy + (40 * S)], fill=color_cromo_sombra, width=2 * S)
 
-    # Parrilla delantera cromada
-    draw.rounded_rectangle([cx + (65 * S), cy + (12 * S), cx + (77 * S), cy + (36 * S)], radius=4 * S, fill=color_cromo, outline=color_borde, width=3 * S)
+    # Estatuilla/Emblema en el radiador
+    draw.ellipse([cx + (80 * S), cy + (1 * S), cx + (84 * S), cy + (5 * S)], fill=color_cromo, outline=color_borde, width=1 * S)
 
-    # Faros circulares con haz de luz
-    draw.ellipse([cx + (50 * S), cy + (5 * S), cx + (68 * S), cy + (23 * S)], fill=color_faros, outline=color_borde, width=3 * S)
-    draw.ellipse([cx + (54 * S), cy + (9 * S), cx + (64 * S), cy + (19 * S)], fill=(255, 255, 255))
+    # 6. Gran faro delantero circular cromado con haz de luz
+    draw.ellipse([cx + (60 * S), cy - (2 * S), cx + (80 * S), cy + (18 * S)], fill=color_cromo, outline=color_borde, width=3 * S)
+    draw.ellipse([cx + (63 * S), cy + (1 * S), cx + (77 * S), cy + (15 * S)], fill=color_faros, outline=color_borde, width=2 * S)
+    draw.ellipse([cx + (66 * S), cy + (4 * S), cx + (72 * S), cy + (10 * S)], fill=(255, 255, 255))
 
-    # Ruedas con tapacubos cromados
-    # Rueda delantera
-    rx1 = cx + (45 * S)
-    draw.ellipse([rx1 - (20 * S), cy + (20 * S), rx1 + (20 * S), cy + (60 * S)], fill=color_ruedas, outline=color_borde, width=3 * S)
-    draw.ellipse([rx1 - (10 * S), cy + (30 * S), rx1 + (10 * S), cy + (50 * S)], fill=color_cromo, outline=color_borde, width=2 * S)
-    # Rueda trasera
-    rx2 = cx - (48 * S)
-    draw.ellipse([rx2 - (20 * S), cy + (20 * S), rx2 + (20 * S), cy + (60 * S)], fill=color_ruedas, outline=color_borde, width=3 * S)
-    draw.ellipse([rx2 - (10 * S), cy + (30 * S), rx2 + (10 * S), cy + (50 * S)], fill=color_cromo, outline=color_borde, width=2 * S)
+    # 7. Ruedas de colección: Neumático negro con banda blanca ("white walls") y llanta cromada
+    def dibujar_rueda_vintage(rx, ry):
+        rw = 21 * S
+        rh = 21 * S
+        # Neumático de caucho negro
+        draw.ellipse([rx - rw, ry - rh, rx + rw, ry + rh], fill=color_neumaticos, outline=color_borde, width=3 * S)
+        # Banda blanca clásica de pared
+        draw.ellipse([rx - (15 * S), ry - (15 * S), rx + (15 * S), ry + (15 * S)], fill=(255, 255, 255), outline=color_borde, width=2 * S)
+        # Tapacubos central cromado
+        draw.ellipse([rx - (9 * S), ry - (9 * S), rx + (9 * S), ry + (9 * S)], fill=color_cromo, outline=color_borde, width=2 * S)
+        # Reflejo central
+        draw.ellipse([rx - (4 * S), ry - (5 * S), rx, ry - (1 * S)], fill=(255, 255, 255))
+
+    # Rueda delantera y rueda trasera
+    dibujar_rueda_vintage(cx + (54 * S), cy + (42 * S))
+    dibujar_rueda_vintage(cx - (62 * S), cy + (42 * S))
+
+    # 8. Parachoques delantero y trasero cromados
+    draw.rounded_rectangle([cx + (84 * S), cy + (36 * S), cx + (94 * S), cy + (44 * S)], radius=3 * S, fill=color_cromo, outline=color_borde, width=2 * S)
+    draw.rounded_rectangle([cx - (94 * S), cy + (36 * S), cx - (84 * S), cy + (44 * S)], radius=3 * S, fill=color_cromo, outline=color_borde, width=2 * S)
 
     return finalizar_hi_res(img_hi, tamano)
 
@@ -699,10 +844,8 @@ def generar_parking_v2_escudo_p(tamano=256):
     cx, cy = T // 2, T // 2
 
     color_oro = (255, 215, 0)
-    color_oro_oscuro = (218, 165, 32)
     color_azul = (21, 101, 192)
     color_borde = (25, 25, 25)
-    w_borde = 5 * S
 
     # Escudo circular azul zafiro con borde dorado
     draw.ellipse([cx - (75 * S), cy - (75 * S), cx + (75 * S), cy + (75 * S)], fill=color_azul, outline=color_oro, width=8 * S)
@@ -724,76 +867,245 @@ def generar_parking_v2_escudo_p(tamano=256):
     return finalizar_hi_res(img_hi, tamano)
 
 
-def generar_ir_carcel_v1_policia(tamano=256):
-    """Variante 1: Oficial de policía con gorra de plato, silbato y dedo acusador apuntando a la cárcel."""
+def generar_parking_v3_coche_roadster(tamano=256):
+    """Variante 3: Roadster descapotable biplaza en azul medianoche con tapicería cuero crema."""
     img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
-    cx, cy = T // 2, T // 2
+    cx, cy = T // 2, T // 2 + (8 * S)
 
-    color_uniforme = (26, 35, 126)     # Azul marino policial
-    color_piel = (255, 204, 128)       # Tono piel
-    color_gorra = (13, 71, 161)
-    color_placa = (255, 215, 0)
+    color_auto = (26, 35, 126)
+    color_cuero = (245, 222, 179)
+    color_cromo = (236, 239, 241)
     color_borde = (20, 20, 20)
     w_borde = 5 * S
 
-    # 1. Brazo derecho extendido apuntando con el dedo índice hacia la izquierda/abajo
+    # Sombra de suelo
+    draw.ellipse([cx - (90 * S), cy + (40 * S), cx + (90 * S), cy + (64 * S)], fill=(0, 0, 0, 90))
+
+    # Carrocería deportiva aerodinámica
+    pts = [
+        (cx - (82 * S), cy + (34 * S)),
+        (cx - (84 * S), cy + (12 * S)),
+        (cx - (65 * S), cy - (6 * S)),
+        (cx - (25 * S), cy - (8 * S)),   # Cabina abierta
+        (cx + (15 * S), cy - (8 * S)),
+        (cx + (35 * S), cy - (16 * S)),  # Parabrisas bajo
+        (cx + (80 * S), cy + (8 * S)),
+        (cx + (84 * S), cy + (36 * S))
+    ]
+    draw.polygon(pts, fill=color_auto, outline=color_borde)
+    draw.line(pts + [pts[0]], fill=color_borde, width=w_borde)
+
+    # Tapicería del asiento en cuero crema visible
+    draw.rounded_rectangle([cx - (22 * S), cy - (18 * S), cx + (12 * S), cy + (2 * S)], radius=4 * S, fill=color_cuero, outline=color_borde, width=2 * S)
+    # Volante deportivo de tres radios
+    draw.ellipse([cx + (12 * S), cy - (18 * S), cx + (26 * S), cy - (4 * S)], outline=(33, 33, 33), width=3 * S)
+
+    # Ruedas de radios deportivos
+    for rx in [cx - (58 * S), cx + (58 * S)]:
+        draw.ellipse([rx - (20 * S), cy + (22 * S), rx + (20 * S), cy + (62 * S)], fill=(33, 33, 33), outline=color_borde, width=3 * S)
+        draw.ellipse([rx - (11 * S), cy + (31 * S), rx + (11 * S), cy + (53 * S)], fill=color_cromo, outline=color_borde, width=2 * S)
+
+    return finalizar_hi_res(img_hi, tamano)
+
+
+def generar_ir_carcel_v1_policia(tamano=256):
+    """
+    Variante 1 (REDISEÑADA Y PERFECCIONADA): Comisario de policía con gorra de plato curvada,
+    visera brillante, cordón dorado, silbato metálico y brazo extendido con dedo acusador contundente.
+    """
+    img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
+    cx, cy = T // 2, T // 2
+
+    color_uniforme = (26, 35, 126)     # Azul marino noche
+    color_uniforme_luz = (40, 53, 147)
+    color_piel = (255, 204, 128)       # Piel cálida
+    color_piel_sombra = (224, 168, 102)
+    color_gorra = (13, 71, 161)
+    color_dorado = (255, 215, 0)
+    color_borde = (20, 20, 20)
+    w_borde = 5 * S
+
+    # 1. Brazo derecho enérgico extendido apuntando hacia la izquierda/abajo
     pts_brazo = [
-        (cx - (15 * S), cy + (15 * S)),
-        (cx - (85 * S), cy + (45 * S)),
-        (cx - (75 * S), cy + (65 * S)),
-        (cx - (5 * S), cy + (40 * S))
+        (cx - (12 * S), cy + (12 * S)),
+        (cx - (82 * S), cy + (48 * S)),
+        (cx - (72 * S), cy + (68 * S)),
+        (cx - (4 * S), cy + (38 * S))
     ]
     draw.polygon(pts_brazo, fill=color_uniforme, outline=color_borde)
     draw.line(pts_brazo + [pts_brazo[0]], fill=color_borde, width=w_borde)
 
-    # Mano con guante blanco y dedo índice apuntando
-    gx, gy = cx - (82 * S), cy + (50 * S)
-    draw.ellipse([gx - (12 * S), gy - (8 * S), gx + (12 * S), gy + (8 * S)], fill=(255, 255, 255), outline=color_borde, width=3 * S)
-    # Dedo índice extendido
-    draw.polygon([(gx - 10 * S, gy - 6 * S), (gx - 26 * S, gy + 8 * S), (gx - 18 * S, gy + 14 * S), (gx - 4 * S, gy)], fill=(255, 255, 255), outline=color_borde)
+    # Galones dorados en la bocamanga del oficial
+    draw.line([(cx - 68 * S, cy + 50 * S), (cx - 60 * S, cy + 64 * S)], fill=color_dorado, width=3 * S)
+    draw.line([(cx - 62 * S, cy + 47 * S), (cx - 54 * S, cy + 61 * S)], fill=color_dorado, width=3 * S)
 
-    # 2. Torso del oficial
+    # Mano enguantada en blanco nítido con el dedo índice acusador
+    gx, gy = cx - (82 * S), cy + (52 * S)
+    # Palma enguantada
+    draw.ellipse([gx - (12 * S), gy - (8 * S), gx + (12 * S), gy + (8 * S)], fill=(255, 255, 255), outline=color_borde, width=3 * S)
+    # Dedo índice extendido con ángulo y uña marcada
+    pts_dedo = [(gx - 8 * S, gy - 6 * S), (gx - 28 * S, gy + 10 * S), (gx - 20 * S, gy + 16 * S), (gx - 2 * S, gy)]
+    draw.polygon(pts_dedo, fill=(255, 255, 255), outline=color_borde)
+    draw.line(pts_dedo + [pts_dedo[0]], fill=color_borde, width=3 * S)
+
+    # 2. Torso del oficial con solapas y charreteras
     pts_torso = [
-        (cx - (35 * S), cy + (10 * S)),
-        (cx + (50 * S), cy + (10 * S)),
-        (cx + (60 * S), cy + (80 * S)),
-        (cx - (45 * S), cy + (80 * S))
+        (cx - (34 * S), cy + (12 * S)),
+        (cx + (52 * S), cy + (12 * S)),
+        (cx + (62 * S), cy + (78 * S)),
+        (cx - (42 * S), cy + (78 * S))
     ]
     draw.polygon(pts_torso, fill=color_uniforme, outline=color_borde)
     draw.line(pts_torso + [pts_torso[0]], fill=color_borde, width=w_borde)
 
-    # Cuello de camisa blanca y corbata
-    draw.polygon([(cx - 8 * S, cy + 10 * S), (cx + 12 * S, cy + 10 * S), (cx + 2 * S, cy + 28 * S)], fill=(255, 255, 255))
-    draw.polygon([(cx, cy + 18 * S), (cx + 4 * S, cy + 18 * S), (cx + 6 * S, cy + 50 * S), (cx - 2 * S, cy + 50 * S)], fill=(20, 20, 20))
+    # Charreteras doradas en el hombro derecho e izquierdo
+    draw.rounded_rectangle([cx + (36 * S), cy + (10 * S), cx + (54 * S), cy + (22 * S)], radius=3 * S, fill=color_dorado, outline=color_borde, width=2 * S)
 
-    # Botones dorados
-    for by in [cy + (35 * S), cy + (55 * S)]:
-        draw.ellipse([cx + (15 * S), by, cx + (23 * S), by + (8 * S)], fill=color_placa, outline=color_borde, width=2 * S)
+    # Cuello de camisa blanca impecable y corbata negra
+    draw.polygon([(cx - 6 * S, cy + 12 * S), (cx + 14 * S, cy + 12 * S), (cx + 4 * S, cy + 30 * S)], fill=(255, 255, 255))
+    draw.polygon([(cx + 2 * S, cy + 18 * S), (cx + 6 * S, cy + 18 * S), (cx + 8 * S, cy + 54 * S), (cx, cy + 54 * S)], fill=(20, 20, 20))
 
-    # 3. Cabeza y rostro
-    draw.ellipse([cx - (22 * S), cy - (32 * S), cx + (26 * S), cy + (16 * S)], fill=color_piel, outline=color_borde, width=w_borde)
+    # Botones dorados con relieve
+    for by in [cy + (36 * S), cy + (56 * S)]:
+        draw.ellipse([cx + (16 * S), by, cx + (24 * S), by + (8 * S)], fill=color_dorado, outline=color_borde, width=2 * S)
 
-    # Bigote policial clásico
-    draw.polygon([(cx - (15 * S), cy - (2 * S)), (cx + (5 * S), cy - (2 * S)), (cx + (15 * S), cy + (6 * S)), (cx - (20 * S), cy + (6 * S))], fill=(50, 40, 30))
+    # 3. Cabeza y rostro expresivo del comisario
+    draw.ellipse([cx - (22 * S), cy - (30 * S), cx + (26 * S), cy + (16 * S)], fill=color_piel, outline=color_borde, width=w_borde)
+    # Sombra del cuello
+    draw.ellipse([cx - (15 * S), cy + (5 * S), cx + (18 * S), cy + (16 * S)], fill=color_piel_sombra)
 
-    # Silbato plateado cromado con cadenita
-    draw.rectangle([cx - (24 * S), cy - (2 * S), cx - (12 * S), cy + (4 * S)], fill=(207, 216, 220), outline=color_borde, width=2 * S)
+    # Nariz y ojos decididos
+    draw.line([(cx + (2 * S), cy - (10 * S)), (cx - (2 * S), cy - (2 * S)), (cx + (4 * S), cy - (2 * S))], fill=color_borde, width=2 * S)
+    # Bigote victoriano pulido con puntas curvadas
+    draw.polygon([
+        (cx - (16 * S), cy + (2 * S)),
+        (cx + (2 * S), cy),
+        (cx + (18 * S), cy + (4 * S)),
+        (cx + (14 * S), cy + (9 * S)),
+        (cx - (2 * S), cy + (6 * S)),
+        (cx - (18 * S), cy + (7 * S))
+    ], fill=(45, 30, 20), outline=color_borde)
 
-    # 4. Gorra de plato policial
-    # Visera negra curvada
-    draw.chord([cx - (36 * S), cy - (32 * S), cx + (38 * S), cy - (12 * S)], start=180, end=0, fill=(33, 33, 33), outline=color_borde, width=3 * S)
-    # Corona / plato de la gorra azul marino
+    # Silbato policial metálico en la boca con cadenita colgante
+    draw.rounded_rectangle([cx - (26 * S), cy + (1 * S), cx - (14 * S), cy + (8 * S)], radius=2 * S, fill=(207, 216, 220), outline=color_borde, width=2 * S)
+    draw.line([(cx - (14 * S), cy + (5 * S)), (cx - (6 * S), cy + (18 * S))], fill=color_dorado, width=2 * S)
+
+    # 4. Gorra de oficial de plato curvada
+    # Visera negra acharolada curvada con arco de brillo
+    draw.chord([cx - (36 * S), cy - (32 * S), cx + (40 * S), cy - (10 * S)], start=180, end=0, fill=(25, 25, 25), outline=color_borde, width=3 * S)
+    draw.arc([cx - (30 * S), cy - (28 * S), cx + (34 * S), cy - (12 * S)], start=190, end=350, fill=(255, 255, 255), width=2 * S)
+
+    # Plato / corona de la gorra azul marino expandida
     pts_gorra = [
-        (cx - (38 * S), cy - (28 * S)),
-        (cx + (40 * S), cy - (28 * S)),
-        (cx + (48 * S), cy - (58 * S)),
+        (cx - (38 * S), cy - (26 * S)),
+        (cx + (42 * S), cy - (26 * S)),
+        (cx + (50 * S), cy - (58 * S)),
         (cx - (46 * S), cy - (58 * S))
     ]
     draw.polygon(pts_gorra, fill=color_gorra, outline=color_borde)
     draw.line(pts_gorra + [pts_gorra[0]], fill=color_borde, width=w_borde)
 
-    # Insignia dorada en la gorra
-    draw.polygon([(cx - 2 * S, cy - 54 * S), (cx + 8 * S, cy - 44 * S), (cx + 3 * S, cy - 36 * S), (cx - 7 * S, cy - 36 * S), (cx - 12 * S, cy - 44 * S)], fill=color_placa, outline=color_borde, width=2 * S)
+    # Banda dorada de barboquejo en la base de la gorra
+    draw.line([(cx - 36 * S, cy - 25 * S), (cx + 40 * S, cy - 25 * S)], fill=color_dorado, width=4 * S)
+
+    # Gran escudo policial dorado con estrella tallada
+    ex, ey = cx + (2 * S), cy - (42 * S)
+    draw.polygon([(ex, ey - 12 * S), (ex + 12 * S, ey - 2 * S), (ex + 8 * S, ey + 10 * S), (ex - 8 * S, ey + 10 * S), (ex - 12 * S, ey - 2 * S)], fill=color_dorado, outline=color_borde, width=2 * S)
+    draw.ellipse([ex - (3 * S), ey - (2 * S), ex + (3 * S), ey + (4 * S)], fill=(255, 255, 255))
+
+    return finalizar_hi_res(img_hi, tamano)
+
+
+def generar_ir_carcel_v2_esposas_porra(tamano=256):
+    """Variante 2: Esposas de acero cromado con eslabones + porra policial de caoba cruzada."""
+    img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
+    cx, cy = T // 2, T // 2
+
+    color_acero = (224, 224, 224)
+    color_acero_sombra = (158, 158, 158)
+    color_madera = (93, 64, 55)
+    color_borde = (33, 33, 33)
+    w_borde = 5 * S
+
+    # 1. Porra policial de madera noble en diagonal
+    pts_porra = [
+        (cx - (75 * S), cy + (65 * S)),
+        (cx + (75 * S), cy - (55 * S)),
+        (cx + (82 * S), cy - (47 * S)),
+        (cx - (68 * S), cy + (73 * S))
+    ]
+    draw.polygon(pts_porra, fill=color_madera, outline=color_borde)
+    draw.line(pts_porra + [pts_porra[0]], fill=color_borde, width=w_borde)
+    # Empuñadura ranurada
+    draw.ellipse([cx - (72 * S), cy + (68 * S), cx - (64 * S), cy + (76 * S)], fill=(255, 215, 0), outline=color_borde, width=2 * S)
+
+    # 2. Esposas de acero dobles entrelazadas
+    def dibujar_grillete(gx, gy):
+        draw.ellipse([gx - (30 * S), gy - (30 * S), gx + (30 * S), gy + (30 * S)], fill=color_acero, outline=color_borde, width=w_borde)
+        draw.ellipse([gx - (18 * S), gy - (18 * S), gx + (18 * S), gy + (18 * S)], fill=(255, 255, 255, 0), outline=color_borde, width=3 * S)
+        # Bisagra con remaches
+        draw.rounded_rectangle([gx + (24 * S), gy - (6 * S), gx + (34 * S), gy + (6 * S)], radius=3 * S, fill=color_acero_sombra, outline=color_borde, width=2 * S)
+
+    dibujar_grillete(cx - (32 * S), cy - (10 * S))
+    dibujar_grillete(cx + (28 * S), cy + (12 * S))
+
+    # Eslabones de cadena de acero que unen las dos esposas
+    draw.line([(cx - (6 * S), cy - (5 * S)), (cx + (6 * S), cy + (5 * S))], fill=color_acero, width=6 * S)
+    draw.line([(cx - (6 * S), cy - (5 * S)), (cx + (6 * S), cy + (5 * S))], fill=color_borde, width=2 * S)
+
+    return finalizar_hi_res(img_hi, tamano)
+
+
+def generar_carcel_v1_celda_medieval(tamano=256):
+    """Variante 1 para Cárcel: Ventanuco de prisión con sillares de piedra y barrotes de acero."""
+    img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
+    cx, cy = T // 2, T // 2
+
+    color_muro = (69, 90, 100)
+    color_ladrillo_luz = (96, 125, 139)
+    color_interior = (25, 30, 36)
+    color_acero = (207, 216, 220)
+    color_borde = (20, 20, 20)
+    w_borde = 5 * S
+
+    # Muro de sillares de piedra con textura
+    draw.rectangle([cx - (75 * S), cy - (75 * S), cx + (75 * S), cy + (75 * S)], fill=color_muro, outline=color_borde, width=w_borde)
+
+    # Ventana central de la celda arqueada
+    draw.rectangle([cx - (50 * S), cy - (30 * S), cx + (50 * S), cy + (55 * S)], fill=color_interior, outline=color_borde, width=3 * S)
+    draw.chord([cx - (50 * S), cy - (65 * S), cx + (50 * S), cy + (5 * S)], start=180, end=0, fill=color_interior, outline=color_borde, width=3 * S)
+
+    # Barrotes de hierro cilíndricos verticales
+    for bx in [cx - (30 * S), cx - (10 * S), cx + (10 * S), cx + (30 * S)]:
+        draw.line([bx - 1 * S, cy - (55 * S), bx - 1 * S, cy + (54 * S)], fill=(10, 10, 10), width=4 * S)
+        draw.line([bx, cy - (55 * S), bx, cy + (54 * S)], fill=color_acero, width=4 * S)
+        draw.line([bx + 1 * S, cy - (55 * S), bx + 1 * S, cy + (54 * S)], fill=(255, 255, 255), width=1 * S)
+
+    # Travesaño horizontal
+    draw.line([cx - (50 * S), cy, cx + (50 * S), cy], fill=color_acero, width=5 * S)
+
+    return finalizar_hi_res(img_hi, tamano)
+
+
+def generar_carcel_v2_candado_grilletes(tamano=256):
+    """Variante 2 para Cárcel: Candado pesado de hierro y latón con grilletes y llaves de carcelero."""
+    img_hi, draw, T, S = crear_lienzo_hi_res(tamano)
+    cx, cy = T // 2, T // 2
+
+    color_candado = (255, 193, 7)
+    color_acero = (176, 190, 197)
+    color_borde = (25, 25, 25)
+    w_borde = 5 * S
+
+    # Arco de acero del candado
+    draw.arc([cx - (32 * S), cy - (62 * S), cx + (32 * S), cy], start=180, end=0, fill=color_acero, width=10 * S)
+
+    # Cuerpo macizo del candado de latón
+    draw.rounded_rectangle([cx - (45 * S), cy - (15 * S), cx + (45 * S), cy + (55 * S)], radius=8 * S, fill=color_candado, outline=color_borde, width=w_borde)
+
+    # Ojo de la cerradura
+    draw.ellipse([cx - (7 * S), cy + (8 * S), cx + (7 * S), cy + (22 * S)], fill=color_borde)
+    draw.polygon([(cx - 5 * S, cy + 18 * S), (cx + 5 * S, cy + 18 * S), (cx + 7 * S, cy + 38 * S), (cx - 7 * S, cy + 38 * S)], fill=color_borde)
 
     return finalizar_hi_res(img_hi, tamano)
 
@@ -811,7 +1123,6 @@ def generar_salida_v1_flecha_dinamica(tamano=256):
     w_borde = 6 * S
 
     # Polígono de flecha apuntando a la IZQUIERDA (⬅)
-    # Punta en (cx - 75*S, cy), base del vástago en (cx + 75*S)
     pts_flecha = [
         (cx - (80 * S), cy),               # Punta izquierda
         (cx - (15 * S), cy - (48 * S)),    # Aleta superior
@@ -855,7 +1166,7 @@ def compilar_catalogo_propuestas(directorio_salida):
     dir_iconos = os.path.join(directorio_salida, "iconos_propuestas")
     os.makedirs(dir_iconos, exist_ok=True)
 
-    # Catálogo de elementos y variantes
+    # Catálogo de elementos y variantes ampliado (Dataset v3)
     propuestas = [
         {
             "categoria": "IMPUESTO SOBRE EL CAPITAL (Casilla 4)",
@@ -890,8 +1201,9 @@ def compilar_catalogo_propuestas(directorio_salida):
             "categoria": "CAJA DE COMUNIDAD (Casillas 2, 17, 33)",
             "variantes": [
                 ("Opción 1: Cofre Madera Cerrado", "comunidad_cofre_v1.png", generar_comunidad_v1_cofre(256), False),
-                ("Opción 2: Cofre Abierto con Oro", "comunidad_cofre_v2.png", generar_comunidad_v2_cofre_oro(256), True),
+                ("Opción 2: Oro y Gemas (Sin Masa Amarilla)", "comunidad_cofre_v2.png", generar_comunidad_v2_cofre_oro(256), True),
                 ("Opción 3: Caja Fuerte Blindada", "comunidad_caja_fuerte_v3.png", generar_comunidad_v3_caja_fuerte(256), False),
+                ("Opción 4: Cofre Medieval Candado", "comunidad_reliquia_v4.png", generar_comunidad_v4_tesoro_reliquia(256), False),
             ]
         },
         {
@@ -903,14 +1215,28 @@ def compilar_catalogo_propuestas(directorio_salida):
         {
             "categoria": "PARKING GRATUITO (Casilla 20 - Esquina Superior Izquierda)",
             "variantes": [
-                ("Opción 1: Coche Vintage Clásico", "parking_coche_v1.png", generar_parking_v1_coche_vintage(256), True),
+                ("Opción 1: Coupé Vintage 1930s Monumental", "parking_coche_v1.png", generar_parking_v1_coche_vintage(256), True),
                 ("Opción 2: Insignia Escudo P Real", "parking_escudo_v2.png", generar_parking_v2_escudo_p(256), False),
+                ("Opción 3: Roadster Deportivo", "parking_roadster_v3.png", generar_parking_v3_coche_roadster(256), False),
             ]
         },
         {
-            "categoria": "¡VAYA A LA CÁRCEL! Y ¡SALIDA! (Esquinas)",
+            "categoria": "¡VAYA A LA CÁRCEL! (Casilla 30 - Esquina Superior Derecha)",
             "variantes": [
-                ("Oficial de Policía Apuntando", "ir_carcel_policia_v1.png", generar_ir_carcel_v1_policia(256), True),
+                ("Opción 1: Comisario Dedo Acusador", "ir_carcel_policia_v1.png", generar_ir_carcel_v1_policia(256), True),
+                ("Opción 2: Esposas de Acero y Porra", "ir_carcel_esposas_v2.png", generar_ir_carcel_v2_esposas_porra(256), False),
+            ]
+        },
+        {
+            "categoria": "EN LA CÁRCEL (Casilla 10 - Esquina Inferior Izquierda)",
+            "variantes": [
+                ("Opción 1: Ventana de Mazmorra", "carcel_celda_v1.png", generar_carcel_v1_celda_medieval(256), True),
+                ("Opción 2: Candado y Grilletes", "carcel_candado_v2.png", generar_carcel_v2_candado_grilletes(256), False),
+            ]
+        },
+        {
+            "categoria": "¡SALIDA! (Casilla 0 - Esquina Inferior Derecha)",
+            "variantes": [
                 ("Flecha Dinámica Izquierda (⬅)", "salida_flecha_v1.png", generar_salida_v1_flecha_dinamica(256), True),
             ]
         }
@@ -930,9 +1256,9 @@ def compilar_catalogo_propuestas(directorio_salida):
     with open(ruta_config, "w", encoding="utf-8") as f:
         json.dump(config_activa, f, indent=2, ensure_ascii=False)
 
-    # Dimensiones de la lámina de catálogo
+    # Dimensiones de la lámina de catálogo para móvil
     ancho_lamina = 1400
-    alto_lamina = 2650
+    alto_lamina = 3250
     img_catalogo = Image.new("RGB", (ancho_lamina, alto_lamina), (245, 247, 250))
     draw = ImageDraw.Draw(img_catalogo)
 
@@ -942,7 +1268,7 @@ def compilar_catalogo_propuestas(directorio_salida):
     fnt_sub = obtener_fuente_sistema(22, bold=False)
 
     draw.text((50, 35), "PROPUESTAS DE ICONOS - CAPITAL TYCOON", fill=(255, 255, 255), font=fnt_header)
-    draw.text((50, 95), "Catálogo de alta definición optimizado para pantalla móvil (Dataset v2 Expandido)", fill=(207, 216, 220), font=fnt_sub)
+    draw.text((50, 95), "Catálogo Maestro de Alta Calidad (Dataset v3 - Optimizado para Pantalla Móvil)", fill=(207, 216, 220), font=fnt_sub)
 
     y_cursor = 190
     for p in propuestas:

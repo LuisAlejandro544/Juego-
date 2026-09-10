@@ -161,6 +161,7 @@ MAPA_ARCHIVOS_ICONOS = {
     "TASA_LUJO": "lujo_diamante_v1.png",
     "PARKING_COCHE": "parking_coche_v1.png",
     "IR_CARCEL_POLICIA": "ir_carcel_policia_v1.png",
+    "CARCEL_CELDA": "carcel_celda_v1.png",
     "SALIDA_FLECHA": "salida_flecha_v1.png"
 }
 
@@ -358,53 +359,91 @@ def renderizar_esquina(tipo, tamano, paleta):
         # Estructura oficial en "L":
         # Celda de prisión en el cuadrante interior (hacia el centro del tablero)
         # Pasillos de visita en ángulo en los bordes exteriores (izquierda y abajo)
-        ancho_pasillo = 78
+        ancho_pasillo = 80
         x_celda = ancho_pasillo
         y_celda = 0
         w_celda = tamano - ancho_pasillo
         h_celda = tamano - ancho_pasillo
 
-        # Fondo de la celda en grafito penitenciario de alto contraste
-        color_fondo_celda = (45, 52, 58) if paleta == PALETA_COLOR else (50, 50, 50)
-        draw.rectangle([x_celda, y_celda, tamano - 1, h_celda], fill=color_fondo_celda, outline=paleta["LINEA_BORDE"], width=3)
+        # 1. Pasillos de visita con fondo crema acogedor y nítido
+        color_fondo_visita = (255, 248, 225) if paleta == PALETA_COLOR else (245, 245, 245)
+        # Pasillo vertical izquierdo
+        draw.rectangle([0, 0, ancho_pasillo, tamano - 1], fill=color_fondo_visita)
+        # Pasillo horizontal inferior
+        draw.rectangle([0, tamano - ancho_pasillo, tamano - 1, tamano - 1], fill=color_fondo_visita)
 
-        # Barrotes de acero cilíndrico verticales con brillo volumétrico
+        # 2. Celda de prisión: fondo de sillares de piedra con atmósfera penitenciaria de lujo
+        color_fondo_celda = (40, 48, 54) if paleta == PALETA_COLOR else (55, 55, 55)
+        draw.rectangle([x_celda, y_celda, tamano - 1, h_celda], fill=color_fondo_celda)
+
+        # Marco exterior naranja cálido de la celda para máximo contraste y jerarquía
+        color_marco_celda = (245, 124, 0) if paleta == PALETA_COLOR else (140, 140, 140)
+        draw.rectangle([x_celda, y_celda, tamano - 1, h_celda], outline=color_marco_celda, width=5)
+        draw.rectangle([x_celda + 4, y_celda + 4, tamano - 5, h_celda - 4], outline=(20, 20, 20), width=2)
+
+        # Textura sutil de bloques de piedra en el muro de fondo
+        for ly in range(y_celda + 25, h_celda - 10, 32):
+            draw.line([x_celda + 6, ly, tamano - 7, ly], fill=(52, 62, 70) if paleta == PALETA_COLOR else (65, 65, 65), width=1)
+
+        # Barrotes de acero cilíndrico verticales con modelado 3D (sombra, núcleo y brillo)
         num_barrotes = 6
         espacio_b = w_celda // num_barrotes
         for i in range(1, num_barrotes):
             bx = x_celda + (i * espacio_b)
-            # Sombra del barrote
-            draw.line([bx - 2, y_celda, bx - 2, h_celda], fill=(20, 20, 20), width=3)
-            # Núcleo de acero
-            draw.line([bx, y_celda, bx, h_celda], fill=(176, 190, 197), width=4)
-            # Reflejo de luz central
-            draw.line([bx + 1, y_celda, bx + 1, h_celda], fill=(245, 245, 245), width=1)
+            # Sombra de oclusión
+            draw.line([bx - 3, y_celda + 6, bx - 3, h_celda - 6], fill=(15, 15, 15), width=3)
+            # Núcleo de acero cromado
+            draw.line([bx, y_celda + 6, bx, h_celda - 6], fill=(189, 189, 189), width=5)
+            # Reflejo especular blanco nítido
+            draw.line([bx + 1, y_celda + 6, bx + 1, h_celda - 6], fill=(255, 255, 255), width=2)
 
-        # Placa central enmarcada "EN LA CÁRCEL"
-        pw = 140
-        ph = 42
+        # Travesaño horizontal de hierro
+        ty = y_celda + (h_celda // 2)
+        draw.line([x_celda + 6, ty, tamano - 7, ty], fill=(120, 144, 156), width=6)
+        draw.line([x_celda + 6, ty - 1, tamano - 7, ty - 1], fill=(255, 255, 255), width=1)
+
+        # Placa central "EN LA CÁRCEL" con remaches y cadenas
+        pw = 148
+        ph = 44
         px = x_celda + (w_celda - pw) // 2
-        py = (h_celda - ph) // 2
-        draw.rectangle([px, py, px + pw, py + ph], fill=(239, 108, 0) if paleta == PALETA_COLOR else (120, 120, 120),
+        py = y_celda + 22
+
+        # Cadenas que cuelgan la placa
+        for cx_cad in [px + 18, px + pw - 18]:
+            draw.line([cx_cad, y_celda + 6, cx_cad, py], fill=(207, 216, 220), width=3)
+            draw.ellipse([cx_cad - 3, py - 3, cx_cad + 3, py + 3], fill=(255, 215, 0))
+
+        # Cuerpo de la placa en naranja intenso con bisel oscuro
+        draw.rectangle([px, py, px + pw, py + ph], fill=(230, 81, 0) if paleta == PALETA_COLOR else (100, 100, 100),
                        outline=paleta["LINEA_BORDE"], width=2)
-        fnt_celda = obtener_fuente(16, bold=True)
+        # Remaches en las 4 esquinas de la placa
+        for rx, ry in [(px + 5, py + 5), (px + pw - 5, py + 5), (px + 5, py + ph - 5), (px + pw - 5, py + ph - 5)]:
+            draw.ellipse([rx - 2, ry - 2, rx + 2, ry + 2], fill=(255, 215, 0))
+
+        fnt_celda = obtener_fuente(17, bold=True)
         txt_en_carcel = "EN LA CÁRCEL"
         bbox_ec = draw.textbbox((0, 0), txt_en_carcel, font=fnt_celda)
+        # Sombra de texto
+        draw.text((px + (pw - (bbox_ec[2] - bbox_ec[0])) // 2 + 1, py + 12), txt_en_carcel, fill=(0, 0, 0), font=fnt_celda)
+        # Texto blanco
         draw.text((px + (pw - (bbox_ec[2] - bbox_ec[0])) // 2, py + 11), txt_en_carcel, fill=(255, 255, 255), font=fnt_celda)
 
-        # Pasillo de visita: línea de separación nítida en "L"
-        draw.line([ancho_pasillo, 0, ancho_pasillo, tamano - 1], fill=paleta["LINEA_BORDE"], width=3)
-        draw.line([0, tamano - ancho_pasillo, tamano - 1, tamano - ancho_pasillo], fill=paleta["LINEA_BORDE"], width=3)
+        # 3. Líneas de separación nítida en "L" con doble reborde
+        draw.line([ancho_pasillo, 0, ancho_pasillo, tamano - 1], fill=paleta["LINEA_BORDE"], width=4)
+        draw.line([0, tamano - ancho_pasillo, tamano - 1, tamano - ancho_pasillo], fill=paleta["LINEA_BORDE"], width=4)
 
-        # Rótulos en los pasillos de visita
-        fnt_visita = obtener_fuente(20, bold=True)
+        # Rótulos en los pasillos de visita con tipografía optimizada
+        fnt_visita = obtener_fuente(21, bold=True)
         # Pasillo vertical izquierdo: "SOLO DE"
         txt_solo = "SOLO"
         txt_de = "DE"
         bbox_s = draw.textbbox((0, 0), txt_solo, font=fnt_visita)
         bbox_d = draw.textbbox((0, 0), txt_de, font=fnt_visita)
-        draw.text(((ancho_pasillo - (bbox_s[2] - bbox_s[0])) // 2, 60), txt_solo, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
-        draw.text(((ancho_pasillo - (bbox_d[2] - bbox_d[0])) // 2, 95), txt_de, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+        draw.text(((ancho_pasillo - (bbox_s[2] - bbox_s[0])) // 2, 55), txt_solo, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+        draw.text(((ancho_pasillo - (bbox_d[2] - bbox_d[0])) // 2, 90), txt_de, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+
+        # Flecha indicadora de paso libre hacia la esquina
+        draw.polygon([(ancho_pasillo // 2, 135), (ancho_pasillo // 2 - 12, 155), (ancho_pasillo // 2 + 12, 155)], fill=(120, 144, 156))
 
         # Pasillo horizontal inferior: "VISITA"
         txt_vis = "VISITA"
@@ -420,8 +459,8 @@ def renderizar_esquina(tipo, tamano, paleta):
         draw.text(((tamano - (bbox_p1[2] - bbox_p1[0])) // 2, 18), txt_p1, fill=paleta["ROJO_ALERTA"], font=fnt_parking)
         draw.text(((tamano - (bbox_p2[2] - bbox_p2[0])) // 2, 48), txt_p2, fill=paleta["ROJO_ALERTA"], font=fnt_parking)
 
-        # Icono de coche vintage en alta definición
-        dibujar_icono(img, draw, "PARKING_COCHE", tamano // 2, 142, 130, paleta)
+        # Icono de coche vintage en alta definición con presencia ampliada
+        dibujar_icono(img, draw, "PARKING_COCHE", tamano // 2, 142, 145, paleta)
 
         # Rótulo inferior
         fnt_sub = obtener_fuente(16, bold=True)
@@ -439,7 +478,7 @@ def renderizar_esquina(tipo, tamano, paleta):
         draw.text(((tamano - (bbox_i2[2] - bbox_i2[0])) // 2, 48), txt_i2, fill=paleta["ROJO_ALERTA"], font=fnt_alerta)
 
         # Icono del oficial de policía con dedo acusador en alta definición
-        dibujar_icono(img, draw, "IR_CARCEL_POLICIA", tamano // 2, 142, 135, paleta)
+        dibujar_icono(img, draw, "IR_CARCEL_POLICIA", tamano // 2, 142, 145, paleta)
 
         # Rótulo inferior
         fnt_sub = obtener_fuente(16, bold=True)
