@@ -147,54 +147,92 @@ def ajustar_lineas_y_fuente(draw, texto, max_ancho, max_alto, tamano_max=19):
 
 
 # =============================================================================
-# DIBUJO DE ICONOS VECTORIALES INTEGRADOS
+# DIBUJO DE ICONOS: DATASET DE ALTA DEFINICIÓN CON FALLBACK PROCEDURAL
 # =============================================================================
-def dibujar_icono(draw, tipo, x_cen, y_cen, tam, paleta):
+CACHE_ICONOS = {}
+
+MAPA_ARCHIVOS_ICONOS = {
+    "ESTACION": "tren_vapor_v1.png",
+    "SERVICIO_LUZ": "servicio_bombilla_v1.png",
+    "SERVICIO_AGUA": "servicio_grifo_v1.png",
+    "SUERTE": "suerte_interrogante_v1.png",
+    "COMUNIDAD": "comunidad_cofre_v1.png",
+    "IMPUESTO_CAPITAL": "impuesto_saco_v1.png",
+    "TASA_LUJO": "lujo_diamante_v1.png"
+}
+
+def dibujar_icono(img_destino, draw, tipo, x_cen, y_cen, tam, paleta):
+    """
+    Dibuja un icono en la casilla. Prioriza cargar el PNG en alta definición
+    generado por 'generar_propuestas_iconos.py'. Si no estuviera disponible,
+    utiliza el generador vectorial procedural como respaldo (fallback).
+    """
+    nombre_archivo = MAPA_ARCHIVOS_ICONOS.get(tipo)
+    directorio_iconos = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "output", "iconos_propuestas")
+
+    if nombre_archivo:
+        ruta_archivo = os.path.join(directorio_iconos, nombre_archivo)
+        if not os.path.exists(ruta_archivo):
+            # Si aún no se generaron, ejecutamos el generador de propuestas automáticamente
+            try:
+                from generar_propuestas_iconos import compilar_catalogo_propuestas
+                compilar_catalogo_propuestas(os.path.dirname(directorio_iconos))
+            except Exception:
+                pass
+
+        if os.path.exists(ruta_archivo):
+            clave_cache = (nombre_archivo, tam, paleta == PALETA_BYN)
+            if clave_cache not in CACHE_ICONOS:
+                try:
+                    ico = Image.open(ruta_archivo).convert("RGBA")
+                    if paleta == PALETA_BYN:
+                        # Convertir a escala de grises con preservación de canal alfa
+                        r, g, b, a = ico.split()
+                        gris = ico.convert("L")
+                        ico = Image.merge("RGBA", (gris, gris, gris, a))
+                    ico_redim = ico.resize((tam, tam), resample=Image.Resampling.LANCZOS)
+                    CACHE_ICONOS[clave_cache] = ico_redim
+                except Exception:
+                    CACHE_ICONOS[clave_cache] = None
+
+            icono_listo = CACHE_ICONOS.get(clave_cache)
+            if icono_listo:
+                x_pos = int(x_cen - (tam // 2))
+                y_pos = int(y_cen - (tam // 2))
+                img_destino.paste(icono_listo, (x_pos, y_pos), icono_listo)
+                return
+
+    # -------------------------------------------------------------------------
+    # FALLBACK PROCEDURAL (Si no se encuentra el archivo gráfico)
+    # -------------------------------------------------------------------------
     color_linea = paleta["LINEA_BORDE"]
     color_relleno = paleta["TEXTO_NEGRO"]
 
     if tipo == "ESTACION":
-        # Locomotora / Tren
         draw.rectangle([x_cen - 22, y_cen - 10, x_cen + 22, y_cen + 12], fill=color_relleno)
         draw.rectangle([x_cen - 15, y_cen - 22, x_cen + 15, y_cen - 10], fill=color_relleno)
         draw.rectangle([x_cen + 8, y_cen - 28, x_cen + 14, y_cen - 22], fill=color_relleno)
         draw.ellipse([x_cen - 18, y_cen + 10, x_cen - 6, y_cen + 22], fill=color_linea)
         draw.ellipse([x_cen + 6, y_cen + 10, x_cen + 18, y_cen + 22], fill=color_linea)
-        draw.rectangle([x_cen - 10, y_cen - 18, x_cen - 2, y_cen - 12], fill=paleta["CASILLA_FONDO"])
-        draw.rectangle([x_cen + 2, y_cen - 18, x_cen + 10, y_cen - 12], fill=paleta["CASILLA_FONDO"])
-
     elif tipo == "SERVICIO_LUZ":
-        # Bombilla
         draw.ellipse([x_cen - 16, y_cen - 20, x_cen + 16, y_cen + 8], fill=paleta["DORADO"], outline=color_linea, width=2)
         draw.rectangle([x_cen - 8, y_cen + 8, x_cen + 8, y_cen + 18], fill=color_relleno)
-        draw.line([x_cen - 22, y_cen - 8, x_cen - 28, y_cen - 8], fill=color_linea, width=2)
-        draw.line([x_cen + 22, y_cen - 8, x_cen + 28, y_cen - 8], fill=color_linea, width=2)
-        draw.line([x_cen, y_cen - 24, x_cen, y_cen - 30], fill=color_linea, width=2)
-
     elif tipo == "SERVICIO_AGUA":
-        # Grifo con gota de agua
         draw.rectangle([x_cen - 16, y_cen - 16, x_cen + 10, y_cen - 6], fill=color_relleno)
         draw.rectangle([x_cen + 4, y_cen - 6, x_cen + 14, y_cen + 4], fill=color_relleno)
         draw.ellipse([x_cen + 6, y_cen + 10, x_cen + 12, y_cen + 18], fill=(66, 165, 245) if paleta == PALETA_COLOR else color_relleno)
-
     elif tipo == "SUERTE":
         fnt_interrogacion = obtener_fuente(46, bold=True)
         draw.text((x_cen - 14, y_cen - 26), "?", fill=paleta["ROJO_ALERTA"], font=fnt_interrogacion)
-
     elif tipo == "COMUNIDAD":
         draw.rectangle([x_cen - 22, y_cen - 8, x_cen + 22, y_cen + 16], fill=paleta["DORADO"], outline=color_linea, width=2)
         draw.arc([x_cen - 22, y_cen - 20, x_cen + 22, y_cen + 4], start=180, end=0, fill=color_linea, width=3)
-        draw.ellipse([x_cen - 4, y_cen - 2, x_cen + 4, y_cen + 6], fill=color_linea)
-
     elif tipo == "IMPUESTO_CAPITAL":
         draw.ellipse([x_cen - 18, y_cen - 6, x_cen + 18, y_cen + 20], fill=paleta["DORADO"], outline=color_linea, width=2)
-        draw.polygon([(x_cen - 8, y_cen - 6), (x_cen + 8, y_cen - 6), (x_cen, y_cen - 16)], fill=color_linea)
         fnt_euro = obtener_fuente(16, bold=True)
         draw.text((x_cen - 5, y_cen - 1), "€", fill=color_linea, font=fnt_euro)
-
     elif tipo == "TASA_LUJO":
         draw.ellipse([x_cen - 16, y_cen - 4, x_cen + 16, y_cen + 20], outline=paleta["DORADO"], width=3)
-        draw.polygon([(x_cen - 12, y_cen - 4), (x_cen + 12, y_cen - 4), (x_cen, y_cen - 18)], fill=(33, 150, 243) if paleta == PALETA_COLOR else color_relleno)
 
 
 # =============================================================================
@@ -214,23 +252,24 @@ def renderizar_casilla_estandar(casilla, ancho, alto, paleta):
         color_grupo = paleta[casilla["grupo"]]
         draw.rectangle([0, 0, ancho - 1, alto_franja], fill=color_grupo, outline=paleta["LINEA_BORDE"], width=2)
 
-    # 2. Iconos vectoriales
+    # 2. Iconos vectoriales de alta definición
+    tam_icono = 58
     if c_tipo == "ESTACION":
-        dibujar_icono(draw, "ESTACION", ancho // 2, 70, 36, paleta)
+        dibujar_icono(img, draw, "ESTACION", ancho // 2, 70, tam_icono, paleta)
     elif c_tipo == "SERVICIO":
         if "Electricidad" in casilla["nombre"]:
-            dibujar_icono(draw, "SERVICIO_LUZ", ancho // 2, 70, 36, paleta)
+            dibujar_icono(img, draw, "SERVICIO_LUZ", ancho // 2, 70, tam_icono, paleta)
         else:
-            dibujar_icono(draw, "SERVICIO_AGUA", ancho // 2, 70, 36, paleta)
+            dibujar_icono(img, draw, "SERVICIO_AGUA", ancho // 2, 70, tam_icono, paleta)
     elif c_tipo == "SUERTE":
-        dibujar_icono(draw, "SUERTE", ancho // 2, 85, 42, paleta)
+        dibujar_icono(img, draw, "SUERTE", ancho // 2, 85, 64, paleta)
     elif c_tipo == "COMUNIDAD":
-        dibujar_icono(draw, "COMUNIDAD", ancho // 2, 85, 42, paleta)
+        dibujar_icono(img, draw, "COMUNIDAD", ancho // 2, 85, 64, paleta)
     elif c_tipo == "IMPUESTO":
         if "Capital" in casilla["nombre"]:
-            dibujar_icono(draw, "IMPUESTO_CAPITAL", ancho // 2, 75, 40, paleta)
+            dibujar_icono(img, draw, "IMPUESTO_CAPITAL", ancho // 2, 75, tam_icono, paleta)
         else:
-            dibujar_icono(draw, "TASA_LUJO", ancho // 2, 75, 40, paleta)
+            dibujar_icono(img, draw, "TASA_LUJO", ancho // 2, 75, tam_icono, paleta)
 
     # 3. Nombre con auto-ajuste
     y_min_texto = alto_franja + 10 if c_tipo == "CALLE" else 115
@@ -374,7 +413,7 @@ def generar_tablero_completo(casillas, modo_byn=False):
     card_suerte = Image.new("RGBA", (ancho_mazo, alto_mazo), (0, 0, 0, 0))
     d_cs = ImageDraw.Draw(card_suerte)
     d_cs.rectangle([0, 0, ancho_mazo - 1, alto_mazo - 1], fill=paleta["CASILLA_FONDO"], outline=paleta["LINEA_BORDE"], width=3)
-    dibujar_icono(d_cs, "SUERTE", 50, alto_mazo // 2, 36, paleta)
+    dibujar_icono(card_suerte, d_cs, "SUERTE", 50, alto_mazo // 2, 52, paleta)
     d_cs.text((90, alto_mazo // 2 - 18), "SUERTE", fill=paleta["TEXTO_NEGRO"], font=obtener_fuente(28, bold=True))
     card_suerte_rot = card_suerte.rotate(-15, expand=True, resample=Image.BICUBIC)
     img_maestra.paste(card_suerte_rot, (centro_x + 90, centro_y - 290), card_suerte_rot)
@@ -383,7 +422,7 @@ def generar_tablero_completo(casillas, modo_byn=False):
     card_com = Image.new("RGBA", (ancho_mazo, alto_mazo), (0, 0, 0, 0))
     d_cc = ImageDraw.Draw(card_com)
     d_cc.rectangle([0, 0, ancho_mazo - 1, alto_mazo - 1], fill=paleta["CASILLA_FONDO"], outline=paleta["LINEA_BORDE"], width=3)
-    dibujar_icono(d_cc, "COMUNIDAD", 50, alto_mazo // 2, 36, paleta)
+    dibujar_icono(card_com, d_cc, "COMUNIDAD", 50, alto_mazo // 2, 52, paleta)
     d_cc.text((85, alto_mazo // 2 - 28), "CAJA DE", fill=paleta["TEXTO_NEGRO"], font=obtener_fuente(22, bold=True))
     d_cc.text((85, alto_mazo // 2 + 2), "COMUNIDAD", fill=paleta["TEXTO_NEGRO"], font=obtener_fuente(22, bold=True))
     card_com_rot = card_com.rotate(-15, expand=True, resample=Image.BICUBIC)

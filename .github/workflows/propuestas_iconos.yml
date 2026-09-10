@@ -1,0 +1,59 @@
+name: Generar Propuestas de Iconos y Catálogo
+
+# =============================================================================
+# ACTIVACIÓN ESTRICTAMENTE MANUAL (workflow_dispatch)
+# =============================================================================
+# Diseñado para ejecutarse desde el navegador de un teléfono móvil con un solo toque.
+# Genera una lámina visual (catálogo) con todas las propuestas de iconos y los PNGs
+# individuales con canal alfa para que el usuario pueda compararlos y elegir sus favoritos.
+on:
+  workflow_dispatch:
+    inputs:
+      actualizar_tableros:
+        description: '¿Regenerar también los tableros de 2048x2048 con los nuevos iconos?'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  generar-propuestas:
+    name: Generar Catálogo y Dataset de Iconos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar entorno Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 3. Instalar librerías de renderizado
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      - name: 4. Generar catálogo de propuestas e iconos en alta definición
+        run: |
+          python scripts/generar_propuestas_iconos.py
+
+      - name: 5. Opcional - Actualizar tableros con la iconografía activa
+        if: ${{ inputs.actualizar_tableros }}
+        run: |
+          python scripts/generar_tablero.py
+
+      - name: 6. Empaquetar y subir catálogo de iconos como artefacto ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogo-propuestas-iconos
+          path: |
+            output/catalogo_propuestas_iconos.png
+            output/iconos_propuestas/
+            output/tablero_espana_color.png
+            output/tablero_espana_byn.png
+          retention-days: 30

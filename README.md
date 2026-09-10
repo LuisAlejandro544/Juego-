@@ -14,31 +14,37 @@ Juego de mesa inmobiliario y generador automatizado de tableros estándar de 40 
    - Dados animados con detección de tiradas dobles.
    - Sistema de compra de solares, construcción de casas y hoteles, cobro de alquileres, eventos de Suerte/Caja de Comunidad, cárcel y fianza.
 
-2. **Generador Automatizado de Tableros (Python + SQLite)**:
-   - Generación de tableros de 2048 x 2048 px con las 40 casillas oficiales de la edición España.
-   - Exportación dual:
-     - `tablero_espana_color.png`: A todo color con distritos oficiales y decoración clásica.
+2. **Generador Automatizado de Tableros y Catálogo de Iconos (Python + SQLite)**:
+   - Generación de tableros de 2048 x 2048 px con las 40 casillas oficiales de la edición España e iconografía en alta definición (Supersampling 4x con filtro Lanczos).
+   - Exportación dual de tableros:
+     - `tablero_espana_color.png`: A todo color con distritos oficiales, decoración clásica e iconos nítidos.
      - `tablero_espana_byn.png`: Monocromático de alto contraste para impresión en blanco y negro.
+   - Generador y catálogo de propuestas de iconos:
+     - `catalogo_propuestas_iconos.png`: Lámina comparativa optimizada para pantalla de móvil con variantes numeradas de bolsas de impuestos, joyas de lujo, locomotoras, servicios y cofres.
+     - Carpeta `output/iconos_propuestas/`: Iconos individuales en PNG transparente de 256x256 px.
    - Base de datos relacional SQLite (`tablero_datos.db`) y copia editable en JSON (`tablero_datos.json`) para modificar precios, rentas y reglas económicas.
 
-3. **Workflow de GitHub Actions (Activación 100% Manual)**:
-   - Permite ejecutar el generador en la nube directamente desde el navegador de un teléfono móvil sin necesidad de ordenador.
-   - Genera y empaqueta automáticamente los archivos en un `.zip` descargable.
+3. **Workflows de GitHub Actions (Activación 100% Manual)**:
+   - **"Generar Tableros de España"**: Genera y empaqueta los tableros PNG y la base de datos en un `.zip`.
+   - **"Generar Propuestas de Iconos y Catálogo"**: Genera la lámina de catálogo y los iconos en PNG transparente para previsualizarlos y descargarlos con un solo toque desde el móvil.
 
 ---
 
 ## 🚀 Inicio Rápido desde el Teléfono Móvil
 
-### Opción A: Generar y descargar los tableros con GitHub Actions
-1. Abre tu repositorio en GitHub desde el navegador de tu teléfono móvil.
+### Opción A: Generar propuestas de iconos y catálogo visual
+1. Abre tu repositorio en GitHub desde el navegador de tu smartphone.
 2. Pulsa en la pestaña superior **Actions**.
-3. En la lista lateral izquierda, selecciona el flujo **"Generar Tableros de España"**.
+3. En la lista lateral izquierda, pulsa **"Generar Propuestas de Iconos y Catálogo"**.
 4. Pulsa en el botón azul **"Run workflow"** y confirma la ejecución.
-5. Espera unos 20 segundos a que finalice la ejecución.
-6. Entra en la ejecución completada y en la sección inferior **Artifacts** descarga el archivo `tablero-espana-completo.zip`.
-   * Contiene los dos PNGs (`color` y `blanco y negro`), la base de datos `tablero_datos.db` y el archivo `tablero_datos.json`.
+5. Al terminar, descarga el artefacto `catalogo-propuestas-iconos.zip` para ver la lámina `catalogo_propuestas_iconos.png` y comparar las variantes.
 
-### Opción B: Ejecución local en terminal / entorno Python
+### Opción B: Generar y descargar los tableros de España completos
+1. En la pestaña **Actions**, selecciona el flujo **"Generar Tableros de España"**.
+2. Pulsa en **"Run workflow"** y confirma la ejecución.
+3. Descarga el artefacto `tablero-espana-completo.zip` (contiene los PNGs a 2048x2048, la base de datos `tablero_datos.db` y `tablero_datos.json`).
+
+### Opción C: Ejecución local en terminal / entorno Python
 ```bash
 # 1. Instalar dependencias
 pip install -r scripts/requirements.txt
@@ -75,6 +81,7 @@ La aplicación está construida con la arquitectura recomendada de Android:
 - **Lenguaje**: Kotlin 2.x
 - **UI Framework**: Jetpack Compose con Material Design 3
 - **Persistencia**: Room Database / SQLite
+- **Versión mínima de Android**: Android 8.0 Oreo (API 26) - Cobertura del ~94% de dispositivos.
 - **Compatibilidad**: Compatible con dispositivos de 32 bits y 64 bits (armeabi-v7a, arm64-v8a, x86, x86_64).
 - **Distribución**: Lista para exportar en APK e instalar mediante tiendas de terceros (Uptodown, F-Droid, APKPure) sin dependencia obligatoria de Google Play Services.
 

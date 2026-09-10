@@ -13,11 +13,13 @@ Este documento define la planificación estratégica y técnica para la evoluci�
   - [x] Oponente automatizado (Bot Magnate con toma de decisiones lógicas).
   - [x] Modo Pasa y Juega local en un solo dispositivo.
   - [x] Sistema de Cárcel con fianza de 50€ y turnos de condena.
-- [x] **Generador de Tableros Automático**:
+- [x] **Generador de Tableros y Catálogo de Iconos Automático**:
   - [x] Base de datos SQLite (`tablero_datos.db`) con las 40 casillas de España.
   - [x] Generador de imágenes PNG en alta resolución (2048 x 2048 px).
-  - [x] Exportación dual: Color y Blanco/Negro para impresión.
-  - [x] Workflow de GitHub Actions con activación exclusivamente manual (`workflow_dispatch`).
+  - [x] Dataset de iconos en alta resolución con Supersampling 4x y filtro Lanczos.
+  - [x] Generador de propuestas y catálogo comparativo para móvil (`catalogo_propuestas_iconos.png`).
+  - [x] Exportación dual: Color y Blanco/Negro para impresión con iconos integrados.
+  - [x] Workflows de GitHub Actions manuales (`workflow_dispatch`) para tableros y catálogo de iconos.
   - [x] Corrección tipográfica con auto-ajuste (*auto-fit text*) para evitar desbordes.
   - [x] Rotación orientada hacia el centro del tablero y contraste dinámico.
 

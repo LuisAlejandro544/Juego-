@@ -10,33 +10,37 @@ Este documento describe la organización de carpetas, módulos de código y mode
 .
 ├── .github/
 │   └── workflows/
-│       └── generar_tablero.yml   # Workflow de GitHub Actions (manual: workflow_dispatch)
-├── app/                          # Módulo de la aplicación Android
-│   ├── build.gradle.kts          # Configuración de compilación de la app
+│       ├── generar_tablero.yml            # Generación de tableros (manual: workflow_dispatch)
+│       └── propuestas_iconos.yml          # Catálogo de propuestas de iconos (manual)
+├── app/                                   # Módulo de la aplicación Android
+│   ├── build.gradle.kts                   # Configuración de compilación de la app
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
 │       │   ├── java/com/example/
-│       │   │   ├── MainActivity.kt        # Actividad principal y pantalla de Compose
-│       │   │   ├── GameModels.kt          # Entidades (Casilla, Jugador, Carta, ModoJuego)
-│       │   │   ├── GameViewModel.kt       # Máquina de estados del juego (StateFlow)
-│       │   │   └── ui/theme/              # Sistema de diseño Material 3 (Color, Type, Theme)
+│       │   │   ├── MainActivity.kt         # Actividad principal y pantalla de Compose
+│       │   │   ├── GameModels.kt           # Entidades (Casilla, Jugador, Carta, ModoJuego)
+│       │   │   ├── GameViewModel.kt        # Máquina de estados del juego (StateFlow)
+│       │   │   └── ui/theme/               # Sistema de diseño Material 3 (Color, Type, Theme)
 │       │   └── res/
 │       │       ├── values/
-│       │       │   ├── strings.xml        # Recursos de cadenas de texto
-│       │       │   └── colors.xml         # Paleta de colores del sistema
-│       │       └── mipmap-*/              # Iconos adaptativos del lanzador
-│       └── test/                          # Pruebas unitarias en JVM
-├── scripts/                      # Generador de tableros y herramientas de datos
-│   ├── requirements.txt          # Dependencias de Python (Pillow>=10.0.0)
-│   ├── gestor_db.py              # Creación y administración del esquema SQLite
-│   ├── generar_tablero.py        # Generador de tableros gráficos (Color y Blanco/Negro)
-│   └── modificar_db.py           # Utilidad CLI para editar precios o sincronizar JSON
-├── output/                       # Directorio de artefactos generados
-│   ├── tablero_datos.db          # Base de datos SQLite modificable
-│   ├── tablero_datos.json        # Copia editable en JSON
-│   ├── tablero_espana_color.png  # Tablero oficial de España en alta definición (Color)
-│   └── tablero_espana_byn.png    # Tablero oficial en escala de grises (Blanco y Negro)
+│       │       │   ├── strings.xml         # Recursos de cadenas de texto
+│       │       │   └── colors.xml          # Paleta de colores del sistema
+│       │       └── mipmap-*/               # Iconos adaptativos del lanzador
+│       └── test/                           # Pruebas unitarias en JVM
+├── scripts/                               # Generador de tableros y herramientas de datos
+│   ├── requirements.txt                   # Dependencias de Python (Pillow>=10.0.0)
+│   ├── gestor_db.py                       # Creación y administración del esquema SQLite
+│   ├── generar_tablero.py                 # Generador maestro de tableros gráficos
+│   ├── generar_propuestas_iconos.py       # Generador de variantes y catálogo de iconos
+│   └── modificar_db.py                    # Utilidad CLI para editar precios o sincronizar JSON
+├── output/                                # Directorio de artefactos generados
+│   ├── tablero_datos.db                   # Base de datos SQLite modificable
+│   ├── tablero_datos.json                 # Copia editable en JSON
+│   ├── tablero_espana_color.png           # Tablero oficial de España en alta definición (Color)
+│   ├── tablero_espana_byn.png             # Tablero oficial en escala de grises (Blanco y Negro)
+│   ├── catalogo_propuestas_iconos.png     # Lámina comparativa de variantes de iconos para móvil
+│   └── iconos_propuestas/                 # Iconos individuales PNG de 256x256 con canal alfa
 ├── metadata.json                 # Metadatos de la plataforma Google AI Studio
 ├── build.gradle.kts              # Configuración raíz de Gradle
 ├── settings.gradle.kts           # Módulos y configuración del proyecto

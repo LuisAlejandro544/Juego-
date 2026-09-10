@@ -40,6 +40,7 @@ El proyecto es un **juego de mesa de estrategia inmobiliaria por turnos**, basad
   - Toda la interacción con GitHub Actions debe admitir activación táctil sencilla (`workflow_dispatch`).
   - Las salidas gráficas y datos deben ser descargables en formatos universales (PNG, ZIP, JSON, SQLite).
 - **Entorno de Distribución**: La aplicación Android se distribuirá mediante APKs en tiendas libres o de terceros (Uptodown, etc.). No debe depender de Google Play Services ni bibliotecas propietarias cerradas.
+- **Versión mínima de Android**: Android 8.0 Oreo (API 26 / minSdk = 26).
 - **Arquitectura Móvil**: Soporte para procesadores de 32 bits (`armeabi-v7a`) y 64 bits (`arm64-v8a`).
 - **Idioma del Proyecto**: Tanto la interfaz de usuario, los mensajes de confirmación, los commits y la documentación deben estar en **español**.
 
