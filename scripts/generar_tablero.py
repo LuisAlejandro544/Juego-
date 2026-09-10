@@ -156,9 +156,12 @@ MAPA_ARCHIVOS_ICONOS = {
     "SERVICIO_LUZ": "servicio_bombilla_v1.png",
     "SERVICIO_AGUA": "servicio_grifo_v1.png",
     "SUERTE": "suerte_interrogante_v1.png",
-    "COMUNIDAD": "comunidad_cofre_v1.png",
+    "COMUNIDAD": "comunidad_cofre_v2.png",
     "IMPUESTO_CAPITAL": "impuesto_saco_v1.png",
-    "TASA_LUJO": "lujo_diamante_v1.png"
+    "TASA_LUJO": "lujo_diamante_v1.png",
+    "PARKING_COCHE": "parking_coche_v1.png",
+    "IR_CARCEL_POLICIA": "ir_carcel_policia_v1.png",
+    "SALIDA_FLECHA": "salida_flecha_v1.png"
 }
 
 def dibujar_icono(img_destino, draw, tipo, x_cen, y_cen, tam, paleta):
@@ -233,6 +236,19 @@ def dibujar_icono(img_destino, draw, tipo, x_cen, y_cen, tam, paleta):
         draw.text((x_cen - 5, y_cen - 1), "€", fill=color_linea, font=fnt_euro)
     elif tipo == "TASA_LUJO":
         draw.ellipse([x_cen - 16, y_cen - 4, x_cen + 16, y_cen + 20], outline=paleta["DORADO"], width=3)
+    elif tipo == "SALIDA_FLECHA":
+        # Flecha apuntando a la IZQUIERDA (⬅)
+        draw.polygon([(x_cen - 60, y_cen), (x_cen - 10, y_cen - 30), (x_cen - 10, y_cen - 12),
+                      (x_cen + 60, y_cen - 12), (x_cen + 60, y_cen + 12), (x_cen - 10, y_cen + 12),
+                      (x_cen - 10, y_cen + 30)], fill=paleta["ROJO_ALERTA"], outline=color_linea, width=2)
+    elif tipo == "PARKING_COCHE":
+        draw.rectangle([x_cen - 35, y_cen - 10, x_cen + 35, y_cen + 15], fill=(211, 47, 47), outline=color_linea, width=2)
+        draw.polygon([(x_cen - 25, y_cen - 10), (x_cen - 15, y_cen - 25), (x_cen + 15, y_cen - 25), (x_cen + 25, y_cen - 10)], fill=(211, 47, 47), outline=color_linea)
+        draw.ellipse([x_cen - 28, y_cen + 10, x_cen - 12, y_cen + 26], fill=color_linea)
+        draw.ellipse([x_cen + 12, y_cen + 10, x_cen + 28, y_cen + 26], fill=color_linea)
+    elif tipo == "IR_CARCEL_POLICIA":
+        draw.ellipse([x_cen - 20, y_cen - 20, x_cen + 20, y_cen + 20], fill=paleta["DORADO"], outline=color_linea, width=2)
+        draw.line([x_cen, y_cen, x_cen - 35, y_cen + 25], fill=color_linea, width=4)
 
 
 # =============================================================================
@@ -320,63 +336,116 @@ def renderizar_esquina(tipo, tamano, paleta):
     draw.rectangle([0, 0, tamano - 1, tamano - 1], outline=paleta["LINEA_BORDE"], width=3)
 
     if tipo == "SALIDA":
-        fnt_salida = obtener_fuente(34, bold=True)
+        # 1. Rótulo superior "¡SALIDA!" en rojo vibrante centrado
+        fnt_salida = obtener_fuente(36, bold=True)
         fnt_sub = obtener_fuente(18, bold=True)
-        draw.text((30, 25), "¡SALIDA!", fill=paleta["ROJO_ALERTA"], font=fnt_salida)
+        txt_salida = "¡SALIDA!"
+        bbox_s = draw.textbbox((0, 0), txt_salida, font=fnt_salida)
+        draw.text(((tamano - (bbox_s[2] - bbox_s[0])) // 2, 22), txt_salida, fill=paleta["ROJO_ALERTA"], font=fnt_salida)
 
-        color_flecha = paleta["ROJO_ALERTA"]
-        draw.polygon([(40, 110), (140, 110), (140, 85), (210, 125), (140, 165), (140, 140), (40, 140)], fill=color_flecha)
+        # 2. Flecha apuntando obligatoriamente a la IZQUIERDA (⬅) en alta definición
+        dibujar_icono(img, draw, "SALIDA_FLECHA", tamano // 2, 120, 150, paleta)
 
-        draw.text((25, 195), "COBRA 200 €", fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
-        draw.text((32, 222), "AL PASAR", fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
+        # 3. Textos inferiores centrados
+        txt_c = "COBRA 200 €"
+        txt_p = "AL PASAR"
+        bbox_c = draw.textbbox((0, 0), txt_c, font=fnt_sub)
+        bbox_p = draw.textbbox((0, 0), txt_p, font=fnt_sub)
+        draw.text(((tamano - (bbox_c[2] - bbox_c[0])) // 2, 192), txt_c, fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
+        draw.text(((tamano - (bbox_p[2] - bbox_p[0])) // 2, 220), txt_p, fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
 
     elif tipo == "CARCEL":
-        celda_w = 175
-        celda_h = 175
-        x_c0 = tamano - celda_w
-        y_c0 = 0
-        draw.rectangle([x_c0, y_c0, tamano - 1, celda_h], fill=paleta["CARCEL_NARANJA"], outline=paleta["LINEA_BORDE"], width=2)
+        # Estructura oficial en "L":
+        # Celda de prisión en el cuadrante interior (hacia el centro del tablero)
+        # Pasillos de visita en ángulo en los bordes exteriores (izquierda y abajo)
+        ancho_pasillo = 78
+        x_celda = ancho_pasillo
+        y_celda = 0
+        w_celda = tamano - ancho_pasillo
+        h_celda = tamano - ancho_pasillo
 
+        # Fondo de la celda en grafito penitenciario de alto contraste
+        color_fondo_celda = (45, 52, 58) if paleta == PALETA_COLOR else (50, 50, 50)
+        draw.rectangle([x_celda, y_celda, tamano - 1, h_celda], fill=color_fondo_celda, outline=paleta["LINEA_BORDE"], width=3)
+
+        # Barrotes de acero cilíndrico verticales con brillo volumétrico
         num_barrotes = 6
+        espacio_b = w_celda // num_barrotes
         for i in range(1, num_barrotes):
-            bx = x_c0 + (i * (celda_w // num_barrotes))
-            draw.line([bx, y_c0, bx, celda_h], fill=paleta["LINEA_BORDE"], width=4)
+            bx = x_celda + (i * espacio_b)
+            # Sombra del barrote
+            draw.line([bx - 2, y_celda, bx - 2, h_celda], fill=(20, 20, 20), width=3)
+            # Núcleo de acero
+            draw.line([bx, y_celda, bx, h_celda], fill=(176, 190, 197), width=4)
+            # Reflejo de luz central
+            draw.line([bx + 1, y_celda, bx + 1, h_celda], fill=(245, 245, 245), width=1)
 
-        fnt_carcel = obtener_fuente(20, bold=True)
-        draw.text((x_c0 + 16, celda_h + 8), "EN LA CÁRCEL", fill=paleta["TEXTO_NEGRO"], font=fnt_carcel)
+        # Placa central enmarcada "EN LA CÁRCEL"
+        pw = 140
+        ph = 42
+        px = x_celda + (w_celda - pw) // 2
+        py = (h_celda - ph) // 2
+        draw.rectangle([px, py, px + pw, py + ph], fill=(239, 108, 0) if paleta == PALETA_COLOR else (120, 120, 120),
+                       outline=paleta["LINEA_BORDE"], width=2)
+        fnt_celda = obtener_fuente(16, bold=True)
+        txt_en_carcel = "EN LA CÁRCEL"
+        bbox_ec = draw.textbbox((0, 0), txt_en_carcel, font=fnt_celda)
+        draw.text((px + (pw - (bbox_ec[2] - bbox_ec[0])) // 2, py + 11), txt_en_carcel, fill=(255, 255, 255), font=fnt_celda)
 
-        # Ajuste de posición: "SOLO DE VISITA" con margen cómodo
+        # Pasillo de visita: línea de separación nítida en "L"
+        draw.line([ancho_pasillo, 0, ancho_pasillo, tamano - 1], fill=paleta["LINEA_BORDE"], width=3)
+        draw.line([0, tamano - ancho_pasillo, tamano - 1, tamano - ancho_pasillo], fill=paleta["LINEA_BORDE"], width=3)
+
+        # Rótulos en los pasillos de visita
         fnt_visita = obtener_fuente(20, bold=True)
-        draw.text((14, tamano - 62), "SOLO DE", fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
-        draw.text((22, tamano - 36), "VISITA", fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+        # Pasillo vertical izquierdo: "SOLO DE"
+        txt_solo = "SOLO"
+        txt_de = "DE"
+        bbox_s = draw.textbbox((0, 0), txt_solo, font=fnt_visita)
+        bbox_d = draw.textbbox((0, 0), txt_de, font=fnt_visita)
+        draw.text(((ancho_pasillo - (bbox_s[2] - bbox_s[0])) // 2, 60), txt_solo, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+        draw.text(((ancho_pasillo - (bbox_d[2] - bbox_d[0])) // 2, 95), txt_de, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
+
+        # Pasillo horizontal inferior: "VISITA"
+        txt_vis = "VISITA"
+        bbox_v = draw.textbbox((0, 0), txt_vis, font=fnt_visita)
+        draw.text((ancho_pasillo + (w_celda - (bbox_v[2] - bbox_v[0])) // 2, tamano - 52), txt_vis, fill=paleta["TEXTO_NEGRO"], font=fnt_visita)
 
     elif tipo == "PARKING":
-        fnt_parking = obtener_fuente(26, bold=True)
-        draw.text((45, 22), "PARKING", fill=paleta["ROJO_ALERTA"], font=fnt_parking)
-        draw.text((40, 52), "GRATUITO", fill=paleta["ROJO_ALERTA"], font=fnt_parking)
+        fnt_parking = obtener_fuente(28, bold=True)
+        txt_p1 = "PARKING"
+        txt_p2 = "GRATUITO"
+        bbox_p1 = draw.textbbox((0, 0), txt_p1, font=fnt_parking)
+        bbox_p2 = draw.textbbox((0, 0), txt_p2, font=fnt_parking)
+        draw.text(((tamano - (bbox_p1[2] - bbox_p1[0])) // 2, 18), txt_p1, fill=paleta["ROJO_ALERTA"], font=fnt_parking)
+        draw.text(((tamano - (bbox_p2[2] - bbox_p2[0])) // 2, 48), txt_p2, fill=paleta["ROJO_ALERTA"], font=fnt_parking)
 
-        cx = tamano // 2
-        cy = tamano // 2 + 20
-        color_auto = (33, 150, 243) if paleta == PALETA_COLOR else (60, 60, 60)
-        draw.rectangle([cx - 50, cy - 10, cx + 50, cy + 20], fill=color_auto, outline=paleta["LINEA_BORDE"], width=2)
-        draw.polygon([(cx - 35, cy - 10), (cx - 20, cy - 35), (cx + 20, cy - 35), (cx + 35, cy - 10)], fill=color_auto, outline=paleta["LINEA_BORDE"])
-        draw.ellipse([cx - 40, cy + 12, cx - 18, cy + 34], fill=paleta["LINEA_BORDE"])
-        draw.ellipse([cx + 18, cy + 12, cx + 40, cy + 34], fill=paleta["LINEA_BORDE"])
+        # Icono de coche vintage en alta definición
+        dibujar_icono(img, draw, "PARKING_COCHE", tamano // 2, 142, 130, paleta)
 
-        # Ajuste de posición: Separado de la línea de fondo
-        draw.text((42, tamano - 52), "DESCANSO / BOTE", fill=paleta["TEXTO_NEGRO"], font=obtener_fuente(16, bold=True))
+        # Rótulo inferior
+        fnt_sub = obtener_fuente(16, bold=True)
+        txt_sub = "DESCANSO / BOTE"
+        bbox_sub = draw.textbbox((0, 0), txt_sub, font=fnt_sub)
+        draw.text(((tamano - (bbox_sub[2] - bbox_sub[0])) // 2, tamano - 45), txt_sub, fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
 
     elif tipo == "IR_CARCEL":
         fnt_alerta = obtener_fuente(28, bold=True)
-        draw.text((38, 22), "¡VAYA A LA", fill=paleta["ROJO_ALERTA"], font=fnt_alerta)
-        draw.text((55, 56), "CÁRCEL!", fill=paleta["ROJO_ALERTA"], font=fnt_alerta)
+        txt_i1 = "¡VAYA A LA"
+        txt_i2 = "CÁRCEL!"
+        bbox_i1 = draw.textbbox((0, 0), txt_i1, font=fnt_alerta)
+        bbox_i2 = draw.textbbox((0, 0), txt_i2, font=fnt_alerta)
+        draw.text(((tamano - (bbox_i1[2] - bbox_i1[0])) // 2, 18), txt_i1, fill=paleta["ROJO_ALERTA"], font=fnt_alerta)
+        draw.text(((tamano - (bbox_i2[2] - bbox_i2[0])) // 2, 48), txt_i2, fill=paleta["ROJO_ALERTA"], font=fnt_alerta)
 
-        cx = tamano // 2
-        cy = tamano // 2 + 20
-        draw.ellipse([cx - 28, cy - 28, cx + 28, cy + 28], fill=paleta["DORADO"], outline=paleta["LINEA_BORDE"], width=2)
-        draw.polygon([(cx - 15, cy + 26), (cx + 15, cy + 26), (cx + 38, cy + 55), (cx - 38, cy + 55)], fill=(25, 25, 112) if paleta == PALETA_COLOR else (60, 60, 60))
+        # Icono del oficial de policía con dedo acusador en alta definición
+        dibujar_icono(img, draw, "IR_CARCEL_POLICIA", tamano // 2, 142, 135, paleta)
 
-        draw.text((22, tamano - 52), "DIRECTO A PRISIÓN", fill=paleta["TEXTO_NEGRO"], font=obtener_fuente(16, bold=True))
+        # Rótulo inferior
+        fnt_sub = obtener_fuente(16, bold=True)
+        txt_sub = "DIRECTO A PRISIÓN"
+        bbox_sub = draw.textbbox((0, 0), txt_sub, font=fnt_sub)
+        draw.text(((tamano - (bbox_sub[2] - bbox_sub[0])) // 2, tamano - 45), txt_sub, fill=paleta["TEXTO_NEGRO"], font=fnt_sub)
 
     return img
 
