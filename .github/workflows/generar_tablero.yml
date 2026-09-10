@@ -40,11 +40,13 @@ jobs:
         run: |
           python scripts/generar_tablero.py
 
-      - name: 5. Publicar ambos PNG como artefacto para descarga directa
+      - name: 5. Publicar tableros PNG y base de datos SQLite como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: tableros-espana-png
+          name: tablero-espana-completo
           path: |
             output/tablero_espana_color.png
             output/tablero_espana_byn.png
+            output/tablero_datos.db
+            output/tablero_datos.json
           retention-days: 30
